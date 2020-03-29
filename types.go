@@ -34,7 +34,7 @@ var (
 	_outType    = reflect.TypeOf(Out{})
 )
 
-// Special interface embedded inside dig sentinel values (dig.In, dig.Out) to
+// Special interface embedded inside dig sentinel values (inject.In, inject.Out) to
 // make their special nature obvious in the godocs. Otherwise they will appear
 // as plain empty structs.
 type digSentinel interface {
@@ -48,7 +48,7 @@ type digSentinel interface {
 // package-level documentation for more information.
 //
 // Fields of the struct may optionally be tagged to customize the behavior of
-// dig. The following tags are supported,
+// inject. The following tags are supported,
 //
 //   name        Requests a value with the same name and type from the
 //               container. See Named Values for more information.
@@ -70,9 +70,9 @@ type In struct{ digSentinel }
 // documentation for more information.
 //
 // Fields of the struct may optionally be tagged to customize the behavior of
-// dig. The following tags are supported,
+// inject. The following tags are supported,
 //
-//   name        Specifies the name of the value. Only a field on a dig.In
+//   name        Specifies the name of the value. Only a field on a inject.In
 //               struct with the same 'name' annotation can receive this
 //               value. See Named Values for more information.
 //   group       Name of the Value Group to which this field's value is being
@@ -84,29 +84,29 @@ func isError(t reflect.Type) bool {
 	return t.Implements(_errType)
 }
 
-// IsIn checks whether the given struct is a dig.In struct. A struct qualifies
-// as a dig.In struct if it embeds the dig.In type or if any struct that it
-// embeds is a dig.In struct. The parameter may be the reflect.Type of the
+// IsIn checks whether the given struct is a inject.In struct. A struct qualifies
+// as a inject.In struct if it embeds the inject.In type or if any struct that it
+// embeds is a inject.In struct. The parameter may be the reflect.Type of the
 // struct rather than the struct itself.
 //
-// A struct MUST qualify as a dig.In struct for its fields to be treated
-// specially by dig.
+// A struct MUST qualify as a inject.In struct for its fields to be treated
+// specially by inject.
 //
-// See the documentation for dig.In for a comprehensive list of supported
+// See the documentation for inject.In for a comprehensive list of supported
 // tags.
 func IsIn(o interface{}) bool {
 	return embedsType(o, _inType)
 }
 
-// IsOut checks whether the given struct is a dig.Out struct. A struct
-// qualifies as a dig.Out struct if it embeds the dig.Out type or if any
-// struct that it embeds is a dig.Out struct. The parameter may be the
+// IsOut checks whether the given struct is a inject.Out struct. A struct
+// qualifies as a inject.Out struct if it embeds the inject.Out type or if any
+// struct that it embeds is a inject.Out struct. The parameter may be the
 // reflect.Type of the struct rather than the struct itself.
 //
-// A struct MUST qualify as a dig.Out struct for its fields to be treated
-// specially by dig.
+// A struct MUST qualify as a inject.Out struct for its fields to be treated
+// specially by inject.
 //
-// See the documentation for dig.Out for a comprehensive list of supported
+// See the documentation for inject.Out for a comprehensive list of supported
 // tags.
 func IsOut(o interface{}) bool {
 	return embedsType(o, _outType)
@@ -116,7 +116,7 @@ func IsOut(o interface{}) bool {
 func embedsType(i interface{}, e reflect.Type) bool {
 	// TODO: this function doesn't consider e being a pointer.
 	// given `type A foo { *In }`, this function would return false for
-	// embedding dig.In, which makes for some extra error checking in places
+	// embedding inject.In, which makes for some extra error checking in places
 	// that call this funciton. Might be worthwhile to consider reflect.Indirect
 	// usage to clean up the callers.
 

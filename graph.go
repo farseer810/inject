@@ -45,7 +45,7 @@ func (f visualizeOptionFunc) applyVisualizeOption(opts *visualizeOptions) { f(op
 // Visualize if an error was returned by Invoke or Provide.
 //
 //   if err := c.Provide(...); err != nil {
-//     dig.Visualize(c, w, dig.VisualizeError(err))
+//     inject.Visualize(c, w, inject.VisualizeError(err))
 //   }
 //
 // This option has no effect if the error was nil or if it didn't contain any

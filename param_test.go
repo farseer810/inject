@@ -89,7 +89,7 @@ func TestParamObjectSuccess(t *testing.T) {
 		assert.False(t, t3.Optional)
 	})
 
-	t.Run("tags don't apply to nested dig.In", func(t *testing.T) {
+	t.Run("tags don't apply to nested inject.In", func(t *testing.T) {
 		require.Equal(t, "Nested", po.Fields[3].FieldName)
 		nested, ok := po.Fields[3].Param.(paramObject)
 		require.True(t, ok, "Nested must be a paramObject")

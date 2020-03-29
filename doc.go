@@ -29,7 +29,7 @@
 // Dig exposes type Container as an object capable of resolving a directed
 // acyclic dependency graph. Use the New function to create one.
 //
-//   c := dig.New()
+//   c := inject.New()
 //
 // Provide
 //
@@ -138,11 +138,11 @@
 // a parameter object.
 //
 // Dig has first class support for parameter objects: any struct embedding
-// dig.In gets treated as a parameter object. The following is equivalent to
+// inject.In gets treated as a parameter object. The following is equivalent to
 // the constructor above.
 //
 //   type HandlerParams struct {
-//     dig.In
+//     inject.In
 //
 //     Users    *UserGateway
 //     Comments *CommentGateway
@@ -165,7 +165,7 @@
 //
 // Result objects are the flip side of parameter objects. These are structs
 // that represent multiple outputs from a single function as fields in the
-// struct. Structs embedding dig.Out get treated as result objects.
+// struct. Structs embedding inject.Out get treated as result objects.
 //
 //   func SetupGateways(conn *sql.DB) (*UserGateway, *CommentGateway, *PostGateway, error) {
 //     // ...
@@ -174,7 +174,7 @@
 // The above is equivalent to,
 //
 //  type Gateways struct {
-//    dig.Out
+//    inject.Out
 //
 //    Users    *UserGateway
 //    Comments *CommentGateway
@@ -190,13 +190,13 @@
 // Constructors often don't have a hard dependency on some types and
 // are able to operate in a degraded state when that dependency is missing.
 // Dig supports declaring dependencies as optional by adding an
-// `optional:"true"` tag to fields of a dig.In struct.
+// `optional:"true"` tag to fields of a inject.In struct.
 //
-// Fields in a dig.In structs that have the `optional:"true"` tag are treated
+// Fields in a inject.In structs that have the `optional:"true"` tag are treated
 // as optional by Dig.
 //
 //   type UserGatewayParams struct {
-//     dig.In
+//     inject.In
 //
 //     Conn  *sql.DB
 //     Cache *redis.Client `optional:"true"`
@@ -224,7 +224,7 @@
 // multiple values of the same type to the container with the use of Named
 // Values.
 //
-// Named Values can be produced by passing the dig.Name option when a
+// Named Values can be produced by passing the inject.Name option when a
 // constructor is provided. All values produced by that constructor will have
 // the given name.
 //
@@ -234,17 +234,17 @@
 //   func NewReadWriteConnection(...) (*sql.DB, error)
 //
 // You can provide *sql.DB into a Container under different names by passing
-// the dig.Name option.
+// the inject.Name option.
 //
-//   c.Provide(NewReadOnlyConnection, dig.Name("ro"))
-//   c.Provide(NewReadWriteConnection, dig.Name("rw"))
+//   c.Provide(NewReadOnlyConnection, inject.Name("ro"))
+//   c.Provide(NewReadWriteConnection, inject.Name("rw"))
 //
-// Alternatively, you can produce a dig.Out struct and tag its fields with
+// Alternatively, you can produce a inject.Out struct and tag its fields with
 // `name:".."` to have the corresponding value added to the graph under the
 // specified name.
 //
 //   type ConnectionResult struct {
-//     dig.Out
+//     inject.Out
 //
 //     ReadWrite *sql.DB `name:"rw"`
 //     ReadOnly  *sql.DB `name:"ro"`
@@ -256,11 +256,11 @@
 //   }
 //
 // Regardless of how a Named Value was produced, it can be consumed by another
-// constructor by accepting a dig.In struct which has exported fields with the
+// constructor by accepting a inject.In struct which has exported fields with the
 // same name AND type that you provided.
 //
 //   type GatewayParams struct {
-//     dig.In
+//     inject.In
 //
 //     WriteToConn  *sql.DB `name:"rw"`
 //     ReadFromConn *sql.DB `name:"ro"`
@@ -270,7 +270,7 @@
 // dependency optional.
 //
 //   type GatewayParams struct {
-//     dig.In
+//     inject.In
 //
 //     WriteToConn  *sql.DB `name:"rw"`
 //     ReadFromConn *sql.DB `name:"ro" optional:"true"`
@@ -293,11 +293,11 @@
 // unordered collection in the container. Other constructors can request all
 // values in this collection as a slice.
 //
-// Constructors can send values into value groups by returning a dig.Out
+// Constructors can send values into value groups by returning a inject.Out
 // struct tagged with `group:".."`.
 //
 //   type HandlerResult struct {
-//     dig.Out
+//     inject.Out
 //
 //     Handler Handler `group:"server"`
 //   }
@@ -316,7 +316,7 @@
 // provide a value to that group in an unspecified order.
 //
 //   type ServerParams struct {
-//     dig.In
+//     inject.In
 //
 //     Handlers []Handler `group:"server"`
 //   }

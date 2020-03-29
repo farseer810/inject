@@ -33,7 +33,7 @@ import (
 // The following implementations exist:
 //   resultList    All values returned by the constructor.
 //   resultSingle  A single value produced by a constructor.
-//   resultObject  dig.Out struct where each field in the struct can be
+//   resultObject  inject.Out struct where each field in the struct can be
 //                 another result.
 //   resultGrouped A value produced by a constructor that is part of a value
 //                 group.
@@ -152,7 +152,7 @@ func walkResult(r result, v resultVisitor) {
 		}
 	default:
 		panic(fmt.Sprintf(
-			"It looks like you have found a bug in dig. "+
+			"It looks like you have found a bug in inject. "+
 				"Please file an issue at https://github.com/uber-go/dig/issues/ "+
 				"and provide the following message: "+
 				"received unknown result type %T", res))
@@ -208,7 +208,7 @@ func newResultList(ctype reflect.Type, opts resultOptions) (resultList, error) {
 }
 
 func (resultList) Extract(containerWriter, reflect.Value) {
-	panic("It looks like you have found a bug in dig. " +
+	panic("It looks like you have found a bug in inject. " +
 		"Please file an issue at https://github.com/uber-go/dig/issues/ " +
 		"and provide the following message: " +
 		"resultList.Extract() must never be called")
@@ -253,7 +253,7 @@ func (rs resultSingle) Extract(cw containerWriter, v reflect.Value) {
 	cw.setValue(rs.Name, rs.Type, v)
 }
 
-// resultObject is a dig.Out struct where each field is another result.
+// resultObject is a inject.Out struct where each field is another result.
 //
 // This object is not added to the graph. Its fields are interpreted as
 // results and added to the graph if needed.
@@ -285,7 +285,7 @@ func newResultObject(t reflect.Type, opts resultOptions) (resultObject, error) {
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		if f.Type == _outType {
-			// Skip over the dig.Out embed.
+			// Skip over the inject.Out embed.
 			continue
 		}
 
@@ -305,7 +305,7 @@ func (ro resultObject) Extract(cw containerWriter, v reflect.Value) {
 	}
 }
 
-// resultObjectField is a single field inside a dig.Out struct.
+// resultObjectField is a single field inside a inject.Out struct.
 type resultObjectField struct {
 	// Name of the field in the struct.
 	FieldName string
@@ -364,7 +364,7 @@ func newResultObjectField(idx int, f reflect.StructField, opts resultOptions) (r
 // resultGrouped is a value produced by a constructor that is part of a result
 // group.
 //
-// These will be produced as fields of a dig.Out struct.
+// These will be produced as fields of a inject.Out struct.
 type resultGrouped struct {
 	// Name of the group as specified in the `group:".."` tag.
 	Group string

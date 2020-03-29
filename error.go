@@ -121,7 +121,7 @@ func errf(msg string, args ...interface{}) error {
 	buildErrf = func(args []interface{}) error {
 		arg, args := args[0], args[1:] // assume len(args) > 0
 		if arg == nil {
-			panic("It looks like you have found a bug in dig. " +
+			panic("It looks like you have found a bug in inject. " +
 				"Please file an issue at https://github.com/uber-go/dig/issues/ " +
 				"and provide the following message: " +
 				"arg must not be nil")
@@ -132,7 +132,7 @@ func errf(msg string, args ...interface{}) error {
 			need := numFmtArgs(v)
 			if len(args) < need {
 				panic(fmt.Sprintf(
-					"It looks like you have found a bug in dig. "+
+					"It looks like you have found a bug in inject. "+
 						"Please file an issue at https://github.com/uber-go/dig/issues/ "+
 						"and provide the following message: "+
 						"string %q needs %v arguments, got %v", v, need, len(args)))
@@ -154,7 +154,7 @@ func errf(msg string, args ...interface{}) error {
 		case error:
 			if len(args) > 0 {
 				panic(fmt.Sprintf(
-					"It looks like you have found a bug in dig. "+
+					"It looks like you have found a bug in inject. "+
 						"Please file an issue at https://github.com/uber-go/dig/issues/ "+
 						"and provide the following message: "+
 						"error must be the last element but got %v", args))
@@ -164,7 +164,7 @@ func errf(msg string, args ...interface{}) error {
 
 		default:
 			panic(fmt.Sprintf(
-				"It looks like you have found a bug in dig. "+
+				"It looks like you have found a bug in inject. "+
 					"Please file an issue at https://github.com/uber-go/dig/issues/ "+
 					"and provide the following message: "+
 					"unexpected errf-argument type %T", arg))

@@ -33,7 +33,7 @@ import (
 // The following implementations exist:
 //  paramList     All arguments of the constructor.
 //  paramSingle   An explicitly requested type.
-//  paramObject   dig.In struct where each field in the struct can be another
+//  paramObject   inject.In struct where each field in the struct can be another
 //                param.
 //  paramGroupedSlice
 //                A slice consuming a value group. This will receive all
@@ -60,7 +60,7 @@ var (
 )
 
 // newParam builds a param from the given type. If the provided type is a
-// dig.In struct, an paramObject will be returned.
+// inject.In struct, an paramObject will be returned.
 func newParam(t reflect.Type) (param, error) {
 	switch {
 	case IsOut(t) || (t.Kind() == reflect.Ptr && IsOut(t.Elem())) || embedsType(t, _outPtrType):
@@ -132,7 +132,7 @@ func walkParam(p param, v paramVisitor) {
 		}
 	default:
 		panic(fmt.Sprintf(
-			"It looks like you have found a bug in dig. "+
+			"It looks like you have found a bug in inject. "+
 				"Please file an issue at https://github.com/uber-go/dig/issues/ "+
 				"and provide the following message: "+
 				"received unknown param type %T", p))
@@ -186,7 +186,7 @@ func newParamList(ctype reflect.Type) (paramList, error) {
 }
 
 func (pl paramList) Build(containerStore) (reflect.Value, error) {
-	panic("It looks like you have found a bug in dig. " +
+	panic("It looks like you have found a bug in inject. " +
 		"Please file an issue at https://github.com/uber-go/dig/issues/ " +
 		"and provide the following message: " +
 		"paramList.Build() must never be called")
@@ -266,7 +266,7 @@ func (ps paramSingle) Build(c containerStore) (reflect.Value, error) {
 	return v, nil
 }
 
-// paramObject is a dig.In struct where each field is another param.
+// paramObject is a inject.In struct where each field is another param.
 //
 // This object is not expected in the graph as-is.
 type paramObject struct {
@@ -283,14 +283,14 @@ func (po paramObject) DotParam() []*dot.Param {
 }
 
 // newParamObject builds an paramObject from the provided type. The type MUST
-// be a dig.In struct.
+// be a inject.In struct.
 func newParamObject(t reflect.Type) (paramObject, error) {
 	po := paramObject{Type: t}
 
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		if f.Type == _inType {
-			// Skip over the dig.In embed.
+			// Skip over the inject.In embed.
 			continue
 		}
 
@@ -317,7 +317,7 @@ func (po paramObject) Build(c containerStore) (reflect.Value, error) {
 	return dest, nil
 }
 
-// paramObjectField is a single field of a dig.In struct.
+// paramObjectField is a single field of a inject.In struct.
 type paramObjectField struct {
 	// Name of the field in the struct.
 	FieldName string

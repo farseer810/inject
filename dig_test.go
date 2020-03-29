@@ -360,8 +360,8 @@ func TestEndToEndSuccess(t *testing.T) {
 			return Ret{A: myA, B: myB}
 		}), "provide for the Ret struct should succeed")
 		require.NoError(t, c.Invoke(func(a A, b *B) {
-			assert.Equal(t, a.name, "string A", "value type should work for dig.Out")
-			assert.Equal(t, b.name, "string B", "pointer should work for dig.Out")
+			assert.Equal(t, a.name, "string A", "value type should work for inject.Out")
+			assert.Equal(t, b.name, "string B", "pointer should work for inject.Out")
 			assert.True(t, myA == a, "should get the same pointer for &A")
 			assert.Equal(t, b, myB, "b and myB should be uqual")
 		}))
@@ -691,9 +691,9 @@ func TestEndToEndSuccess(t *testing.T) {
 
 	})
 
-	t.Run("dynamically generated dig.In", func(t *testing.T) {
-		// This test verifies that a dig.In generated using reflect.StructOf
-		// works with our dig.In detection logic.
+	t.Run("dynamically generated inject.In", func(t *testing.T) {
+		// This test verifies that a inject.In generated using reflect.StructOf
+		// works with our inject.In detection logic.
 		c := New()
 
 		type type1 struct{}
@@ -708,7 +708,7 @@ func TestEndToEndSuccess(t *testing.T) {
 
 		require.NoError(t, c.Provide(new1), "failed to provide constructor")
 
-		// We generate a struct that embeds dig.In.
+		// We generate a struct that embeds inject.In.
 		//
 		// Note that the fix for https://github.com/golang/go/issues/18780
 		// requires that StructField.Name is always set but versions of Go
@@ -752,9 +752,9 @@ func TestEndToEndSuccess(t *testing.T) {
 		require.NoError(t, c.Invoke(fn.Interface()), "invoke failed")
 	})
 
-	t.Run("dynamically generated dig.Out", func(t *testing.T) {
-		// This test verifies that a dig.Out generated using reflect.StructOf
-		// works with our dig.Out detection logic.
+	t.Run("dynamically generated inject.Out", func(t *testing.T) {
+		// This test verifies that a inject.Out generated using reflect.StructOf
+		// works with our inject.Out detection logic.
 
 		c := New()
 
@@ -1440,7 +1440,7 @@ func TestProvideInvalidName(t *testing.T) {
 		panic("this function must not be called")
 	}, Name("foo`bar"))
 	require.Error(t, err, "Provide must fail")
-	assert.Contains(t, err.Error(), "invalid dig.Name(\"foo`bar\"): names cannot contain backquotes")
+	assert.Contains(t, err.Error(), "invalid inject.Name(\"foo`bar\"): names cannot contain backquotes")
 }
 
 func TestProvideInvalidGroup(t *testing.T) {
@@ -1451,7 +1451,7 @@ func TestProvideInvalidGroup(t *testing.T) {
 		panic("this function must not be called")
 	}, Group("foo`bar"))
 	require.Error(t, err, "Provide must fail")
-	assert.Contains(t, err.Error(), "invalid dig.Group(\"foo`bar\"): group names cannot contain backquotes")
+	assert.Contains(t, err.Error(), "invalid inject.Group(\"foo`bar\"): group names cannot contain backquotes")
 }
 
 func TestProvideGroupAndName(t *testing.T) {
@@ -1584,7 +1584,7 @@ func TestProvideCycleFails(t *testing.T) {
 	})
 
 	t.Run("inject.In based cycle", func(t *testing.T) {
-		// Same cycle as before but in terms of dig.Ins.
+		// Same cycle as before but in terms of inject.Ins.
 
 		type A struct{}
 		type B struct{}

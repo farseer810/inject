@@ -76,10 +76,10 @@ func (o *provideOptions) Validate() error {
 	// https://golang.org/ref/spec#raw_string_lit is that they cannot contain
 	// backquotes.
 	if strings.ContainsRune(o.Name, '`') {
-		return errf("invalid dig.Name(%q): names cannot contain backquotes", o.Name)
+		return errf("invalid inject.Name(%q): names cannot contain backquotes", o.Name)
 	}
 	if strings.ContainsRune(o.Group, '`') {
-		return errf("invalid dig.Group(%q): group names cannot contain backquotes", o.Group)
+		return errf("invalid inject.Group(%q): group names cannot contain backquotes", o.Group)
 	}
 	return nil
 }
@@ -105,8 +105,8 @@ func (f provideOptionFunc) applyProvideOption(opts *provideOptions) { f(opts) }
 // The following will provide two connections to the container: one under the
 // name "ro" and the other under the name "rw".
 //
-//   c.Provide(NewReadOnlyConnection, dig.Name("ro"))
-//   c.Provide(NewReadWriteConnection, dig.Name("rw"))
+//   c.Provide(NewReadOnlyConnection, inject.Name("ro"))
+//   c.Provide(NewReadWriteConnection, inject.Name("rw"))
 //
 // This option cannot be provided for constructors which produce result
 // objects.
@@ -324,7 +324,7 @@ func (c *Container) getProviders(k key) []provider {
 //
 // In addition to accepting constructors that accept dependencies as separate
 // arguments and produce results as separate return values, Provide also
-// accepts constructors that specify dependencies as dig.In structs and/or
+// accepts constructors that specify dependencies as inject.In structs and/or
 // specify results as inject.Out structs.
 func (c *Container) Provide(constructor interface{}, opts ...ProvideOption) error {
 	ctype := reflect.TypeOf(constructor)

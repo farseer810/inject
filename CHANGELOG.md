@@ -61,13 +61,13 @@ rewriting constructors. See package doucmentation for more information.
 
 ## [1.2.0] - 2017-11-07
 ### Added
-- `dig.In` and `dig.Out` now support value groups, making it possible to
+- `inject.In` and `inject.Out` now support value groups, making it possible to
   produce many values of the same type from different constructors. See package
   documentation for more information.
 
 ## [1.1.0] - 2017-09-15
 ### Added
-- Added the `dig.RootCause` function which allows retrieving the original
+- Added the `inject.RootCause` function which allows retrieving the original
   constructor error that caused an `Invoke` failure.
 
 ### Changed
@@ -79,20 +79,20 @@ rewriting constructors. See package doucmentation for more information.
 First stable release: no breaking changes will be made in the 1.x series.
 
 ### Changed
-- `Provide` and `Invoke` will now fail if `dig.In` or `dig.Out` structs
+- `Provide` and `Invoke` will now fail if `inject.In` or `inject.Out` structs
   contain unexported fields. Previously these fields were ignored which often
   led to confusion.
 
 ## [1.0.0-rc2] - 2017-07-21
 ### Added
-- Exported `dig.IsIn` and `dig.IsOut` so that consuming libraries can check if
-  a params or return struct embeds the `dig.In` and `dig.Out` types, respectively.
+- Exported `inject.IsIn` and `inject.IsOut` so that consuming libraries can check if
+  a params or return struct embeds the `inject.In` and `inject.Out` types, respectively.
 
 ### Changed
 - Added variadic options to all public APIS so that new functionality can be
   introduced post v1.0.0 without introducing breaking changes.
-- Functions with variadic arguments can now be passed to `dig.Provide` and
-  `dig.Invoke`. Previously this caused an error, whereas now the args will be ignored.
+- Functions with variadic arguments can now be passed to `inject.Provide` and
+  `inject.Invoke`. Previously this caused an error, whereas now the args will be ignored.
 
 ## [1.0.0-rc1] - 2017-06-21
 
@@ -100,11 +100,11 @@ First release candidate.
 
 ## [0.5.0] - 2017-06-19
 ### Added
-- `dig.In` and `dig.Out` now support named instances, i.e.:
+- `inject.In` and `inject.Out` now support named instances, i.e.:
 
     ```go
     type param struct {
-      dig.In
+      inject.In
 
       DB1 DB.Connection `name:"primary"`
       DB2 DB.Connection `name:"secondary"`
@@ -112,15 +112,15 @@ First release candidate.
     ```
 
 ### Fixed
-- Structs compatible with `dig.In` and `dig.Out` may now be generated using
+- Structs compatible with `inject.In` and `inject.Out` may now be generated using
   `reflect.StructOf`.
 
 ## [0.4.0] - 2017-06-12
 ### Added
-- Add `dig.In` embeddable type for advanced use-cases of specifying dependencies.
-- Add `dig.Out` embeddable type for advanced use-cases of constructors
+- Add `inject.In` embeddable type for advanced use-cases of specifying dependencies.
+- Add `inject.Out` embeddable type for advanced use-cases of constructors
   inserting types in the container.
-- Add support for optional parameters through `optional:"true"` tag on `dig.In` objects.
+- Add support for optional parameters through `optional:"true"` tag on `inject.In` objects.
 - Add support for value types and many built-ins (maps, slices, channels).
 
 ### Changed
@@ -134,9 +134,9 @@ First release candidate.
 ## [0.3] - 2017-05-02
 ### Added
 - Add functionality to `Provide` to support constructor with `n` return
-  objects to be resolved into the `dig.Graph`
+  objects to be resolved into the `inject.Graph`
 - Add `Invoke` function to invoke provided function and insert return
-  objects into the `dig.Graph`
+  objects into the `inject.Graph`
 
 ### Changed
 - Rename `RegisterAll` and `MustRegisterAll` to `ProvideAll` and
@@ -146,7 +146,7 @@ First release candidate.
 ### Changed
 - Rename `Register` to `Provide` for clarity and to recude clash with other
   Register functions.
-- Rename `dig.Graph` to `dig.Container`.
+- Rename `inject.Graph` to `inject.Container`.
 
 ### Removed
 - Remove the package-level functions and the `DefaultGraph`.
