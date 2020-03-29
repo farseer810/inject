@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"fmt"
@@ -26,10 +26,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/farseer810/inject/internal/digreflect"
+	"github.com/farseer810/inject/internal/dot"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/dig/internal/digreflect"
-	"go.uber.org/dig/internal/dot"
 )
 
 func TestDotGraph(t *testing.T) {

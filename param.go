@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"errors"
 	"fmt"
 	"reflect"
 
-	"go.uber.org/dig/internal/dot"
+	"github.com/farseer810/inject/internal/dot"
 )
 
 // The param interface represents a dependency for a constructor.
@@ -64,17 +64,17 @@ var (
 func newParam(t reflect.Type) (param, error) {
 	switch {
 	case IsOut(t) || (t.Kind() == reflect.Ptr && IsOut(t.Elem())) || embedsType(t, _outPtrType):
-		return nil, errf("cannot depend on result objects", "%v embeds a dig.Out", t)
+		return nil, errf("cannot depend on result objects", "%v embeds a inject.Out", t)
 	case IsIn(t):
 		return newParamObject(t)
 	case embedsType(t, _inPtrType):
 		return nil, errf(
-			"cannot build a parameter object by embedding *dig.In, embed dig.In instead",
-			"%v embeds *dig.In", t)
+			"cannot build a parameter object by embedding *inject.In, embed inject.In instead",
+			"%v embeds *inject.In", t)
 	case t.Kind() == reflect.Ptr && IsIn(t.Elem()):
 		return nil, errf(
 			"cannot depend on a pointer to a parameter object, use a value instead",
-			"%v is a pointer to a struct that embeds dig.In", t)
+			"%v is a pointer to a struct that embeds inject.In", t)
 	default:
 		return paramSingle{Type: t}, nil
 	}
@@ -346,7 +346,7 @@ func newParamObjectField(idx int, f reflect.StructField) (paramObjectField, erro
 	switch {
 	case f.PkgPath != "":
 		return pof, errf(
-			"unexported fields not allowed in dig.In, did you mean to export %q (%v)?",
+			"unexported fields not allowed in inject.In, did you mean to export %q (%v)?",
 			f.Name, f.Type)
 
 	case f.Tag.Get(_groupTag) != "":

@@ -1,39 +1,39 @@
 digraph {
 	rankdir=RL;
 	graph [compound=true];
-	"[type=dig.t3 group=foo]" [shape=diamond label=<dig.t3<BR /><FONT POINT-SIZE="10">Group: foo</FONT>>];
-		"[type=dig.t3 group=foo]" -> "dig.t3[group=foo]0";
-		"[type=dig.t3 group=foo]" -> "dig.t3[group=foo]1";
+	"[type=inject.t3 group=foo]" [shape=diamond label=<inject.t3<BR /><FONT POINT-SIZE="10">Group: foo</FONT>>];
+		"[type=inject.t3 group=foo]" -> "inject.t3[group=foo]0";
+		"[type=inject.t3 group=foo]" -> "inject.t3[group=foo]1";
 		
 	
 		subgraph cluster_0 {
-			label = "go.uber.org/dig";
+			label = "github.com/farseer810/inject";
 			constructor_0 [shape=plaintext label="TestVisualize.func5.1"];
 			
-			"dig.t3[group=foo]0" [label=<dig.t3<BR /><FONT POINT-SIZE="10">Group: foo</FONT>>];
+			"inject.t3[group=foo]0" [label=<inject.t3<BR /><FONT POINT-SIZE="10">Group: foo</FONT>>];
 			
 		}
 		
 		
 		subgraph cluster_1 {
-			label = "go.uber.org/dig";
+			label = "github.com/farseer810/inject";
 			constructor_1 [shape=plaintext label="TestVisualize.func5.2"];
 			
-			"dig.t3[group=foo]1" [label=<dig.t3<BR /><FONT POINT-SIZE="10">Group: foo</FONT>>];
+			"inject.t3[group=foo]1" [label=<inject.t3<BR /><FONT POINT-SIZE="10">Group: foo</FONT>>];
 			
 		}
 		
 		
 		subgraph cluster_2 {
-			label = "go.uber.org/dig";
+			label = "github.com/farseer810/inject";
 			constructor_2 [shape=plaintext label="TestVisualize.func5.3"];
 			
-			"dig.t2" [label=<dig.t2>];
+			"inject.t2" [label=<inject.t2>];
 			
 		}
 		
 		
-			constructor_2 -> "[type=dig.t3 group=foo]" [ltail=cluster_2];
+			constructor_2 -> "[type=inject.t3 group=foo]" [ltail=cluster_2];
 		
 	
 }

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"bytes"
@@ -864,10 +864,10 @@ func TestEndToEndSuccess(t *testing.T) {
 		err := c.Invoke(func(B) {})
 		require.Error(t, err, "invoking with B param should error out")
 		assertErrorMatches(t, err,
-			`missing dependencies for function "go.uber.org/dig".TestEndToEndSuccess.func\S+`,
+			`missing dependencies for function "github.com/farseer810/inject".TestEndToEndSuccess.func\S+`,
 			`dig_test.go:\d+`, // file:line
 			"missing type:",
-			"dig.B",
+			"inject.B",
 		)
 	})
 }
@@ -1209,9 +1209,9 @@ func TestGroups(t *testing.T) {
 		})
 		require.Error(t, err, "expected failure")
 		assertErrorMatches(t, err,
-			`could not build arguments for function "go.uber.org/dig".TestGroups`,
+			`could not build arguments for function "github.com/farseer810/inject".TestGroups`,
 			`could not build value group string\[group="x"\]:`,
-			`received non-nil error from function "go.uber.org/dig".TestGroups\S+`,
+			`received non-nil error from function "github.com/farseer810/inject".TestGroups\S+`,
 			`dig_test.go:\d+`, // file:line
 			"great sadness",
 		)
@@ -1231,7 +1231,7 @@ func TestProvideConstructorErrors(t *testing.T) {
 		require.Error(t, c.Provide(constructor), "provide failed")
 	})
 
-	t.Run("constructor consumes a dig.Out", func(t *testing.T) {
+	t.Run("constructor consumes a inject.Out", func(t *testing.T) {
 		c := New()
 		type out struct {
 			Out
@@ -1251,19 +1251,19 @@ func TestProvideConstructorErrors(t *testing.T) {
 			msg         string
 		}{
 			{
-				desc:        "dig.Out",
+				desc:        "inject.Out",
 				constructor: func(out) io.Writer { return nil },
-				msg:         "dig.out embeds a dig.Out",
+				msg:         "inject.out embeds a inject.Out",
 			},
 			{
-				desc:        "*dig.Out",
+				desc:        "*inject.Out",
 				constructor: func(*out) io.Writer { return nil },
-				msg:         `\*dig.out embeds a dig.Out`,
+				msg:         `\*inject.out embeds a inject.Out`,
 			},
 			{
-				desc:        "embeds *dig.Out",
+				desc:        "embeds *inject.Out",
 				constructor: func(outPtr) io.Writer { return nil },
-				msg:         `dig.outPtr embeds a dig.Out`,
+				msg:         `inject.outPtr embeds a inject.Out`,
 			},
 		}
 
@@ -1272,7 +1272,7 @@ func TestProvideConstructorErrors(t *testing.T) {
 				err := c.Provide(tt.constructor)
 				require.Error(t, err, "provide should fail")
 				assertErrorMatches(t, err,
-					`cannot provide function "go.uber.org/dig".TestProvideConstructorErrors\S+`,
+					`cannot provide function "github.com/farseer810/inject".TestProvideConstructorErrors\S+`,
 					`dig_test.go:\d+`, // file:line
 					`bad argument 1:`,
 					`cannot depend on result objects:`,
@@ -1295,13 +1295,12 @@ func TestProvideConstructorErrors(t *testing.T) {
 			panic("this function must never be called")
 		}, Name("second"))
 		require.Error(t, err)
-
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestProvideConstructorErrors\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestProvideConstructorErrors\S+`,
 			`dig_test.go:\d+`, // file:line
 			`bad result 1:`,
 			"cannot specify a name for result objects:",
-			"dig.out embeds dig.Out",
+			"inject.out embeds inject.Out",
 		)
 	})
 
@@ -1326,11 +1325,11 @@ func TestProvideConstructorErrors(t *testing.T) {
 		require.Error(t, err)
 
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestProvideConstructorErrors\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestProvideConstructorErrors\S+`,
 			`dig_test.go:\d+`, // file:line
-			`bad field "Result1" of dig.Result2:`,
+			`bad field "Result1" of inject.Result2:`,
 			"cannot specify a name for result objects:",
-			"dig.Result1 embeds dig.Out",
+			"inject.Result1 embeds inject.Out",
 		)
 	})
 }
@@ -1354,10 +1353,10 @@ func TestProvideRespectsConstructorErrors(t *testing.T) {
 		var called bool
 		err := c.Invoke(func(b *bytes.Buffer) { called = true })
 		assertErrorMatches(t, err,
-			`could not build arguments for function "go.uber.org/dig".TestProvideRespectsConstructorErrors\S+`,
+			`could not build arguments for function "github.com/farseer810/inject".TestProvideRespectsConstructorErrors\S+`,
 			`dig_test.go:\d+`, // file:line
 			`failed to build \*bytes.Buffer:`,
-			`received non-nil error from function "go.uber.org/dig".TestProvideRespectsConstructorErrors\S+`,
+			`received non-nil error from function "github.com/farseer810/inject".TestProvideRespectsConstructorErrors\S+`,
 			`dig_test.go:\d+`, // file:line
 			`oh no`)
 		assert.False(t, called, "shouldn't call invoked function when deps aren't available")
@@ -1502,11 +1501,11 @@ func TestCantProvideParameterObjects(t *testing.T) {
 		})
 		require.Error(t, err, "provide should fail")
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestCantProvideParameterObjects\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestCantProvideParameterObjects\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad result 1:",
 			`cannot provide parameter objects:`,
-			`dig.Args embeds a dig.In`,
+			`inject.Args embeds a inject.In`,
 		)
 	})
 
@@ -1519,11 +1518,11 @@ func TestCantProvideParameterObjects(t *testing.T) {
 		err := c.Provide(func() (*Args, error) { return args, nil })
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestCantProvideParameterObjects\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestCantProvideParameterObjects\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad result 1:",
 			`cannot provide parameter objects:`,
-			`\*dig.Args embeds a dig.In`,
+			`\*inject.Args embeds a inject.In`,
 		)
 	})
 }
@@ -1574,17 +1573,17 @@ func TestProvideCycleFails(t *testing.T) {
 		require.Error(t, err, "expected error when introducing cycle")
 		require.True(t, IsCycleDetected(err))
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestProvideCycleFails.\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestProvideCycleFails.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`this function introduces a cycle:`,
-			`\*dig.C provided by "go.uber.org/dig".TestProvideCycleFails\S+ \(\S+\)`,
-			`depends on \*dig.B provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
-			`depends on \*dig.A provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
-			`depends on \*dig.C provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
+			`\*inject.C provided by "github.com/farseer810/inject".TestProvideCycleFails\S+ \(\S+\)`,
+			`depends on \*inject.B provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
+			`depends on \*inject.A provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
+			`depends on \*inject.C provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
 		)
 	})
 
-	t.Run("dig.In based cycle", func(t *testing.T) {
+	t.Run("inject.In based cycle", func(t *testing.T) {
 		// Same cycle as before but in terms of dig.Ins.
 
 		type A struct{}
@@ -1621,13 +1620,13 @@ func TestProvideCycleFails(t *testing.T) {
 		require.Error(t, err, "expected error when introducing cycle")
 		require.True(t, IsCycleDetected(err))
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestProvideCycleFails.\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestProvideCycleFails.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`this function introduces a cycle:`,
-			`dig.C provided by "go.uber.org/dig".TestProvideCycleFails\S+ \(\S+\)`,
-			`depends on dig.B provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
-			`depends on dig.A provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
-			`depends on dig.C provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
+			`inject.C provided by "github.com/farseer810/inject".TestProvideCycleFails\S+ \(\S+\)`,
+			`depends on inject.B provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
+			`depends on inject.A provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
+			`depends on inject.C provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
 		)
 	})
 
@@ -1692,13 +1691,13 @@ func TestProvideCycleFails(t *testing.T) {
 		require.Error(t, err)
 		require.True(t, IsCycleDetected(err))
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestProvideCycleFails.\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestProvideCycleFails.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`this function introduces a cycle:`,
-			`\*dig.D provided by "go.uber.org/dig".TestProvideCycleFails\S+ \(\S+\)`,
-			`depends on int\[group="bar"\] provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
-			`depends on string\[group="foo"\] provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
-			`depends on \*dig.D provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
+			`\*inject.D provided by "github.com/farseer810/inject".TestProvideCycleFails\S+ \(\S+\)`,
+			`depends on int\[group="bar"\] provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
+			`depends on string\[group="foo"\] provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
+			`depends on \*inject.D provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
 		)
 	})
 
@@ -1726,10 +1725,10 @@ func TestProvideCycleFails(t *testing.T) {
 		assert.True(t, IsCycleDetected(err))
 		assertErrorMatches(t, err,
 			`cycle detected in dependency graph:`,
-			`\*dig.C provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
-			`depends on \*dig.B provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
-			`depends on \*dig.A provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
-			`depends on \*dig.C provided by "go.uber.org/dig".TestProvideCycleFails.\S+ \(\S+\)`,
+			`\*inject.C provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
+			`depends on \*inject.B provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
+			`depends on \*inject.A provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
+			`depends on \*inject.C provided by "github.com/farseer810/inject".TestProvideCycleFails.\S+ \(\S+\)`,
 		)
 	})
 }
@@ -1833,9 +1832,9 @@ func TestProvideFailures(t *testing.T) {
 		})
 		require.Error(t, err, "provide must return error")
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestProvideFailures\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestProvideFailures\S+`,
 			`dig_test.go:\d+`, // file:line
-			`cannot provide dig.A from \[0\].A2:`,
+			`cannot provide inject.A from \[0\].A2:`,
 			`already provided by \[0\].A1`,
 		)
 	})
@@ -1859,10 +1858,10 @@ func TestProvideFailures(t *testing.T) {
 		})
 		require.Error(t, err, "expected error on the second provide")
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestProvideFailures\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestProvideFailures\S+`,
 			`dig_test.go:\d+`, // file:line
-			`cannot provide \*dig.A\[name="foo"\] from \[0\].A:`,
-			`already provided by "go.uber.org/dig".TestProvideFailures\S+`,
+			`cannot provide \*inject.A\[name="foo"\] from \[0\].A:`,
+			`already provided by "github.com/farseer810/inject".TestProvideFailures\S+`,
 		)
 	})
 
@@ -1879,11 +1878,11 @@ func TestProvideFailures(t *testing.T) {
 		err := c.Provide(func() out1 { return out1{a2: A{77}} })
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestProvideFailures\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestProvideFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad result 1:",
-			`bad field "a2" of dig.out1:`,
-			`unexported fields not allowed in dig.Out, did you mean to export "a2" \(dig.A\)\?`,
+			`bad field "a2" of inject.out1:`,
+			`unexported fields not allowed in inject.Out, did you mean to export "a2" \(inject.A\)\?`,
 		)
 	})
 
@@ -1897,11 +1896,11 @@ func TestProvideFailures(t *testing.T) {
 		err := c.Provide(func() *out { return &out{String: "foo"} })
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestProvideFailures\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestProvideFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad result 1:",
 			`cannot return a pointer to a result object, use a value instead:`,
-			`\*dig.out is a pointer to a struct that embeds dig.Out`,
+			`\*inject.out is a pointer to a struct that embeds inject.Out`,
 		)
 	})
 
@@ -1917,11 +1916,11 @@ func TestProvideFailures(t *testing.T) {
 		err := c.Provide(func() out { return out{String: "foo"} })
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestProvideFailures\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestProvideFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad result 1:",
-			`cannot build a result object by embedding \*dig.Out, embed dig.Out instead:`,
-			`dig.out embeds \*dig.Out`,
+			`cannot build a result object by embedding \*inject.Out, embed inject.Out instead:`,
+			`inject.out embeds \*inject.Out`,
 		)
 	})
 }
@@ -1949,7 +1948,7 @@ func TestInvokeFailures(t *testing.T) {
 		err := c.Invoke(func(*bytes.Buffer) {})
 		require.Error(t, err, "expected failure")
 		assertErrorMatches(t, err,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures\S+`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures\S+`,
 			`dig_test.go:\d+`,
 			`missing type:`,
 			`\*bytes.Buffer`,
@@ -1974,10 +1973,10 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.Error(t, err, "expected invoke error")
 		assertErrorMatches(t, err,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures\S+`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			`missing type:`,
-			`\*dig.type2`,
+			`\*inject.type2`,
 		)
 	})
 
@@ -1993,7 +1992,7 @@ func TestInvokeFailures(t *testing.T) {
 		})
 		require.Error(t, err, "invoke should fail")
 		assertErrorMatches(t, err,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`missing type:`,
 			`\*bytes.Buffer\[name="foo"\]`,
@@ -2023,13 +2022,13 @@ func TestInvokeFailures(t *testing.T) {
 		})
 		require.Error(t, err, "invoke must fail")
 		assertErrorMatches(t, err,
-			`could not build arguments for function "go.uber.org/dig".TestInvokeFailures\S+`,
+			`could not build arguments for function "github.com/farseer810/inject".TestInvokeFailures\S+`,
 			`dig_test.go:\d+`, // file:line
-			`failed to build \*dig.type3:`,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`failed to build \*inject.type3:`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`missing type:`,
-			`\*dig.type1`,
+			`\*inject.type1`,
 		)
 		// We don't expect type2 to be mentioned in the list because it's
 		// optional
@@ -2056,14 +2055,14 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.Error(t, err, "invoke must fail")
 		assertErrorMatches(t, err,
-			`could not build arguments for function "go.uber.org/dig".TestInvokeFailures\S+`,
+			`could not build arguments for function "github.com/farseer810/inject".TestInvokeFailures\S+`,
 			`dig_test.go:\d+`, // file:line
-			`failed to build dig.type3:`,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`failed to build inject.type3:`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`missing types:`,
-			"dig.type1",
-			`\*dig.type2 \(did you mean (to use )?dig.type2\?\)`,
+			"inject.type1",
+			`\*inject.type2 \(did you mean (to use )?inject.type2\?\)`,
 		)
 	})
 
@@ -2081,7 +2080,7 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.Error(t, err, "expected invoke error")
 		assertErrorMatches(t, err,
-			`bad field "Buffer" of dig.args:`,
+			`bad field "Buffer" of inject.args:`,
 			`invalid value "no" for "optional" tag on field Buffer:`,
 		)
 	})
@@ -2108,11 +2107,11 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.Error(t, err, "expected provide error")
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestInvokeFailures\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestInvokeFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad argument 1:",
-			`bad field "Args" of dig.args:`,
-			`bad field "Buffer" of dig.nestedArgs:`,
+			`bad field "Args" of inject.args:`,
+			`bad field "Buffer" of inject.nestedArgs:`,
 			`invalid value "no" for "optional" tag on field Buffer:`,
 		)
 	})
@@ -2177,13 +2176,13 @@ func TestInvokeFailures(t *testing.T) {
 		})
 		require.Error(t, err, "expected invoke error")
 		assertErrorMatches(t, err,
-			`could not build arguments for function "go.uber.org/dig".TestInvokeFailures\S+`,
+			`could not build arguments for function "github.com/farseer810/inject".TestInvokeFailures\S+`,
 			`dig_test.go:\d+`, // file:line
-			`failed to build \*dig.dep:`,
-			`could not build arguments for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`failed to build \*inject.dep:`,
+			`could not build arguments for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
-			`failed to build \*dig.failed:`,
-			`received non-nil error from function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`failed to build \*inject.failed:`,
+			`received non-nil error from function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`failed`,
 		)
@@ -2222,10 +2221,10 @@ func TestInvokeFailures(t *testing.T) {
 		err := c.Invoke(func(param2) {})
 		require.Error(t, err, "provide should return error since cases don't match")
 		assertErrorMatches(t, err,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures\S+`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			`missing type:`,
-			`dig.A\[name="camelcase"\]`)
+			`inject.A\[name="camelcase"\]`)
 	})
 
 	t.Run("in unexported member gets an error", func(t *testing.T) {
@@ -2243,8 +2242,8 @@ func TestInvokeFailures(t *testing.T) {
 		require.Error(t, err)
 		assertErrorMatches(t, err,
 			"bad argument 1:",
-			`bad field "a2" of dig.in:`,
-			`unexported fields not allowed in dig.In, did you mean to export "a2" \(dig.A\)\?`,
+			`bad field "a2" of inject.in:`,
+			`unexported fields not allowed in inject.In, did you mean to export "a2" \(inject.A\)\?`,
 		)
 	})
 
@@ -2259,11 +2258,11 @@ func TestInvokeFailures(t *testing.T) {
 		err := c.Provide(func(in) int { return 0 })
 		require.Error(t, err, "Provide must fail")
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestInvokeFailures\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestInvokeFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad argument 1:",
-			`bad field "foo" of dig.in:`,
-			`unexported fields not allowed in dig.In, did you mean to export "foo" \(string\)\?`,
+			`bad field "foo" of inject.in:`,
+			`unexported fields not allowed in inject.In, did you mean to export "foo" \(string\)\?`,
 		)
 	})
 
@@ -2285,9 +2284,9 @@ func TestInvokeFailures(t *testing.T) {
 		require.Error(t, err)
 		assertErrorMatches(t, err,
 			"bad argument 1:",
-			`bad field "Embed" of dig.in:`,
-			`bad field "a2" of dig.Embed:`,
-			`unexported fields not allowed in dig.In, did you mean to export "a2" \(dig.A\)\?`,
+			`bad field "Embed" of inject.in:`,
+			`bad field "a2" of inject.Embed:`,
+			`unexported fields not allowed in inject.In, did you mean to export "a2" \(inject.A\)\?`,
 		)
 	})
 
@@ -2302,8 +2301,8 @@ func TestInvokeFailures(t *testing.T) {
 		require.Error(t, err)
 		assertErrorMatches(t, err,
 			"bad argument 1:",
-			`bad field "string" of dig.param:`,
-			`unexported fields not allowed in dig.In, did you mean to export "string" \(string\)\?`,
+			`bad field "string" of inject.param:`,
+			`unexported fields not allowed in inject.In, did you mean to export "string" \(string\)\?`,
 		)
 	})
 
@@ -2320,11 +2319,11 @@ func TestInvokeFailures(t *testing.T) {
 		assertErrorMatches(t, err,
 			"bad argument 1:",
 			"cannot depend on a pointer to a parameter object, use a value instead:",
-			`\*dig.in is a pointer to a struct that embeds dig.In`,
+			`\*inject.in is a pointer to a struct that embeds inject.In`,
 		)
 	})
 
-	t.Run("embedding dig.In and dig.Out is not supported", func(t *testing.T) {
+	t.Run("embedding inject.In and inject.Out is not supported", func(t *testing.T) {
 		c := New()
 		type in struct {
 			In
@@ -2340,7 +2339,7 @@ func TestInvokeFailures(t *testing.T) {
 		assertErrorMatches(t, err,
 			"bad argument 1:",
 			"cannot depend on result objects:",
-			"dig.in embeds a dig.Out",
+			"inject.in embeds a inject.Out",
 		)
 	})
 
@@ -2356,8 +2355,8 @@ func TestInvokeFailures(t *testing.T) {
 		require.Error(t, err)
 		assertErrorMatches(t, err,
 			"bad argument 1:",
-			`cannot build a parameter object by embedding \*dig.In, embed dig.In instead:`,
-			`dig.in embeds \*dig.In`,
+			`cannot build a parameter object by embedding \*inject.In, embed inject.In instead:`,
+			`inject.in embeds \*inject.In`,
 		)
 	})
 
@@ -2382,7 +2381,7 @@ func TestInvokeFailures(t *testing.T) {
 				invoke:  func(A) {},
 				errContains: []string{
 					`missing type:`,
-					`dig.A \(did you mean (to use )?\*dig.A\?\)`,
+					`inject.A \(did you mean (to use )?\*inject.A\?\)`,
 				},
 			},
 			{
@@ -2391,7 +2390,7 @@ func TestInvokeFailures(t *testing.T) {
 				invoke:  func(*A) {},
 				errContains: []string{
 					`missing type:`,
-					`\*dig.A \(did you mean (to use )?dig.A\?\)`,
+					`\*inject.A \(did you mean (to use )?inject.A\?\)`,
 				},
 			},
 			{
@@ -2405,7 +2404,7 @@ func TestInvokeFailures(t *testing.T) {
 				},
 				errContains: []string{
 					`missing type:`,
-					`\*dig.A\[name="hello"\] \(did you mean (to use )?dig.A\[name="hello"\]\?\)`,
+					`\*inject.A\[name="hello"\] \(did you mean (to use )?inject.A\[name="hello"\]\?\)`,
 				},
 			},
 		}
@@ -2422,7 +2421,7 @@ func TestInvokeFailures(t *testing.T) {
 					`dig_test.go:\d+`, // file:line
 				}, tc.errContains...)
 				assertErrorMatches(t, err,
-					`missing dependencies for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+					`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 					lines...)
 			})
 		}
@@ -2436,7 +2435,7 @@ func TestInvokeFailures(t *testing.T) {
 		})
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`missing type:`,
 			`io.Reader \(did you mean (to use )?\*bytes.Reader\?\)`,
@@ -2454,7 +2453,7 @@ func TestInvokeFailures(t *testing.T) {
 		})
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`missing type:`,
 			`io.Reader \(did you mean (to use one of )?\*bytes.Buffer, or \*bytes.Reader\?\)`,
@@ -2472,7 +2471,7 @@ func TestInvokeFailures(t *testing.T) {
 		})
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`missing types:`,
 			`io.Writer \(did you mean (to use )?\*bytes.Buffer\?\)`,
@@ -2489,7 +2488,7 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`missing type:`,
 			`\*bytes.Buffer \(did you mean (to use )?io.Writer\?\)`,
@@ -2508,7 +2507,7 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`missing type:`,
 			`\*bytes.Buffer \(did you mean (to use one of )?io.Reader, or io.Writer\?\)`,
@@ -2528,7 +2527,7 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.Error(t, err, "expected Invoke error")
 		assertErrorMatches(t, err,
-			`received non-nil error from function "go.uber.org/dig".TestInvokeFailures.func\S+`,
+			`received non-nil error from function "github.com/farseer810/inject".TestInvokeFailures.func\S+`,
 			`dig_test.go:\d+`, // file:line
 			"great sadness",
 		)
@@ -2553,11 +2552,11 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.Error(t, err, "expected Invoke error")
 		assertErrorMatches(t, err,
-			`could not build arguments for function "go.uber.org/dig".TestInvokeFailures\S+`,
-			"failed to build dig.B",
-			`could not build arguments for function "go.uber.org/dig".TestInvokeFailures\S+`,
-			"failed to build dig.A",
-			`received non-nil error from function "go.uber.org/dig".TestInvokeFailures.func\S+`,
+			`could not build arguments for function "github.com/farseer810/inject".TestInvokeFailures\S+`,
+			"failed to build inject.B",
+			`could not build arguments for function "github.com/farseer810/inject".TestInvokeFailures\S+`,
+			"failed to build inject.A",
+			`received non-nil error from function "github.com/farseer810/inject".TestInvokeFailures.func\S+`,
 			`dig_test.go:\d+`, // file:line
 			"great sadness",
 		)
@@ -2583,9 +2582,9 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.Error(t, err, "expected Invoke error")
 		assertErrorMatches(t, err,
-			`could not build arguments for function "go.uber.org/dig".TestInvokeFailures.func\S+`,
-			"failed to build dig.A:",
-			`received non-nil error from function "go.uber.org/dig".TestInvokeFailures.func\S+`,
+			`could not build arguments for function "github.com/farseer810/inject".TestInvokeFailures.func\S+`,
+			"failed to build inject.A:",
+			`received non-nil error from function "github.com/farseer810/inject".TestInvokeFailures.func\S+`,
 			`dig_test.go:\d+`, // file:line
 			"great sadness",
 		)
@@ -2616,12 +2615,12 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.Error(t, err, "expected Invoke error")
 		assertErrorMatches(t, err,
-			`could not build arguments for function "go.uber.org/dig".TestInvokeFailures.func\S+`,
+			`could not build arguments for function "github.com/farseer810/inject".TestInvokeFailures.func\S+`,
 			`dig_test.go:\d+`, // file:line
-			"failed to build dig.B:",
-			`could not build arguments for function "go.uber.org/dig".TestInvokeFailures.func\S+`,
-			"failed to build dig.A:",
-			`received non-nil error from function "go.uber.org/dig".TestInvokeFailures.func\S+`,
+			"failed to build inject.B:",
+			`could not build arguments for function "github.com/farseer810/inject".TestInvokeFailures.func\S+`,
+			"failed to build inject.A:",
+			`received non-nil error from function "github.com/farseer810/inject".TestInvokeFailures.func\S+`,
 			`dig_test.go:\d+`, // file:line
 			"great sadness",
 		)
@@ -2656,13 +2655,13 @@ func TestInvokeFailures(t *testing.T) {
 		})
 		require.Error(t, err, "expected failure")
 		assertErrorMatches(t, err,
-			`could not build arguments for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`could not build arguments for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
-			`could not build value group dig.B\[group="b"\]:`,
-			`missing dependencies for function "go.uber.org/dig".TestInvokeFailures.\S+`,
+			`could not build value group inject.B\[group="b"\]:`,
+			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures.\S+`,
 			`dig_test.go:\d+`, // file:line
 			"missing type:",
-			"dig.A",
+			"inject.A",
 		)
 	})
 }

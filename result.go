@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"errors"
 	"fmt"
 	"reflect"
 
-	"go.uber.org/dig/internal/dot"
+	"github.com/farseer810/inject/internal/dot"
 )
 
 // The result interface represents a result produced by a constructor.
@@ -67,19 +67,19 @@ type resultOptions struct {
 func newResult(t reflect.Type, opts resultOptions) (result, error) {
 	switch {
 	case IsIn(t) || (t.Kind() == reflect.Ptr && IsIn(t.Elem())) || embedsType(t, _inPtrType):
-		return nil, errf("cannot provide parameter objects", "%v embeds a dig.In", t)
+		return nil, errf("cannot provide parameter objects", "%v embeds a inject.In", t)
 	case isError(t):
 		return nil, errf("cannot return an error here, return it from the constructor instead")
 	case IsOut(t):
 		return newResultObject(t, opts)
 	case embedsType(t, _outPtrType):
 		return nil, errf(
-			"cannot build a result object by embedding *dig.Out, embed dig.Out instead",
-			"%v embeds *dig.Out", t)
+			"cannot build a result object by embedding *inject.Out, embed inject.Out instead",
+			"%v embeds *inject.Out", t)
 	case t.Kind() == reflect.Ptr && IsOut(t.Elem()):
 		return nil, errf(
 			"cannot return a pointer to a result object, use a value instead",
-			"%v is a pointer to a struct that embeds dig.Out", t)
+			"%v is a pointer to a struct that embeds inject.Out", t)
 	case len(opts.Group) > 0:
 		return resultGrouped{Type: t, Group: opts.Group}, nil
 	default:
@@ -274,12 +274,12 @@ func newResultObject(t reflect.Type, opts resultOptions) (resultObject, error) {
 	ro := resultObject{Type: t}
 	if len(opts.Name) > 0 {
 		return ro, errf(
-			"cannot specify a name for result objects", "%v embeds dig.Out", t)
+			"cannot specify a name for result objects", "%v embeds inject.Out", t)
 	}
 
 	if len(opts.Group) > 0 {
 		return ro, errf(
-			"cannot specify a group for result objects", "%v embeds dig.Out", t)
+			"cannot specify a group for result objects", "%v embeds inject.Out", t)
 	}
 
 	for i := 0; i < t.NumField(); i++ {
@@ -336,7 +336,7 @@ func newResultObjectField(idx int, f reflect.StructField, opts resultOptions) (r
 	switch {
 	case f.PkgPath != "":
 		return rof, errf(
-			"unexported fields not allowed in dig.Out, did you mean to export %q (%v)?", f.Name, f.Type)
+			"unexported fields not allowed in inject.Out, did you mean to export %q (%v)?", f.Name, f.Type)
 
 	case f.Tag.Get(_groupTag) != "":
 		var err error

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"errors"
@@ -27,8 +27,8 @@ import (
 	"reflect"
 	"sort"
 
-	"go.uber.org/dig/internal/digreflect"
-	"go.uber.org/dig/internal/dot"
+	"github.com/farseer810/inject/internal/digreflect"
+	"github.com/farseer810/inject/internal/dot"
 )
 
 // Errors which know their underlying cause should implement this interface to

@@ -3,14 +3,14 @@ digraph {
 	graph [compound=true];
 	
 		subgraph cluster_0 {
-			label = "go.uber.org/dig";
+			label = "github.com/farseer810/inject";
 			constructor_0 [shape=plaintext label="TestVisualize.func6.6.2.2"];
 			color=red;
-			"dig.t4" [label=<dig.t4>];
+			"inject.t4" [label=<inject.t4>];
 			
 		}
 		
 		
-	"dig.t4" [color=red];
+	"inject.t4" [color=red];
 	
 }

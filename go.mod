@@ -1,9 +1,8 @@
-module go.uber.org/dig
+module github.com/farseer810/inject
 
 go 1.13
 
 require (
-	github.com/stretchr/testify v1.4.0
-	golang.org/x/lint v0.0.0-20190930215403-16217165b5de
-	golang.org/x/tools v0.0.0-20191030062658-86caa796c7ab // indirect
+	github.com/stretchr/testify v1.5.1
+	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 )

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"math/rand"
@@ -85,23 +85,23 @@ func TestStringer(t *testing.T) {
 	s := c.String()
 
 	// All nodes
-	assert.Contains(t, s, `dig.A[name="foo"] -> deps: []`)
-	assert.Contains(t, s, "dig.A -> deps: []")
-	assert.Contains(t, s, "dig.B -> deps: []")
-	assert.Contains(t, s, "dig.C -> deps: []")
-	assert.Contains(t, s, `dig.C[name="bar"] -> deps: []`)
-	assert.Contains(t, s, `dig.D -> deps: [dig.A[name="foo"] dig.B[optional] dig.C[optional, name="bar"] string[group="baz"]]`)
-	assert.Contains(t, s, `string[group="baz"] -> deps: [dig.A]`)
-	assert.Contains(t, s, `string[group="baz"] -> deps: [dig.B]`)
-	assert.Contains(t, s, `string[group="baz"] -> deps: [dig.C]`)
+	assert.Contains(t, s, `inject.A[name="foo"] -> deps: []`)
+	assert.Contains(t, s, "inject.A -> deps: []")
+	assert.Contains(t, s, "inject.B -> deps: []")
+	assert.Contains(t, s, "inject.C -> deps: []")
+	assert.Contains(t, s, `inject.C[name="bar"] -> deps: []`)
+	assert.Contains(t, s, `inject.D -> deps: [inject.A[name="foo"] inject.B[optional] inject.C[optional, name="bar"] string[group="baz"]]`)
+	assert.Contains(t, s, `string[group="baz"] -> deps: [inject.A]`)
+	assert.Contains(t, s, `string[group="baz"] -> deps: [inject.B]`)
+	assert.Contains(t, s, `string[group="baz"] -> deps: [inject.C]`)
 
 	// Values
-	assert.Contains(t, s, "dig.A => {}")
-	assert.Contains(t, s, "dig.B => {}")
-	assert.Contains(t, s, "dig.C => {}")
-	assert.Contains(t, s, "dig.D => {}")
-	assert.Contains(t, s, `dig.A[name="foo"] => {}`)
-	assert.Contains(t, s, `dig.C[name="bar"] => {}`)
+	assert.Contains(t, s, "inject.A => {}")
+	assert.Contains(t, s, "inject.B => {}")
+	assert.Contains(t, s, "inject.C => {}")
+	assert.Contains(t, s, "inject.D => {}")
+	assert.Contains(t, s, `inject.A[name="foo"] => {}`)
+	assert.Contains(t, s, `inject.C[name="bar"] => {}`)
 	assert.Contains(t, s, `string[group="baz"] => foo`)
 	assert.Contains(t, s, `string[group="baz"] => bar`)
 	assert.Contains(t, s, `string[group="baz"] => baz`)

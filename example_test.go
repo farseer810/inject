@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig_test
+package inject_test
 
 import (
 	"encoding/json"
 	"log"
 	"os"
 
-	"go.uber.org/dig"
+	"github.com/farseer810/inject"
 )
 
 func Example_minimal() {
@@ -33,7 +33,7 @@ func Example_minimal() {
 		Prefix string
 	}
 
-	c := dig.New()
+	c := inject.New()
 
 	// Provide a Config object. This can fail to decode.
 	err := c.Provide(func() (*Config, error) {

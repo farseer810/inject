@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"io"
@@ -114,7 +114,7 @@ func TestParamObjectFailure(t *testing.T) {
 		_, err := newParamObject(reflect.TypeOf(in{}))
 		require.Error(t, err)
 		assert.Contains(t, err.Error(),
-			`bad field "a2" of dig.in: unexported fields not allowed in dig.In, did you mean to export "a2" (dig.A)`)
+			`bad field "a2" of inject.in: unexported fields not allowed in inject.In, did you mean to export "a2" (inject.A)`)
 	})
 }
 

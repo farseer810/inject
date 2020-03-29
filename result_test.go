@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"fmt"
@@ -36,11 +36,11 @@ func TestNewResultListErrors(t *testing.T) {
 		give interface{}
 	}{
 		{
-			desc: "returns dig.In",
+			desc: "returns inject.In",
 			give: func() struct{ In } { panic("invalid") },
 		},
 		{
-			desc: "returns dig.Out+dig.In",
+			desc: "returns inject.Out+inject.In",
 			give: func() struct {
 				Out
 				In
@@ -57,7 +57,7 @@ func TestNewResultListErrors(t *testing.T) {
 			assertErrorMatches(t, err,
 				"bad result 1:",
 				"cannot provide parameter objects:",
-				"embeds a dig.In")
+				"embeds a inject.In")
 		})
 	}
 }
@@ -87,19 +87,19 @@ func TestNewResultErrors(t *testing.T) {
 	}{
 		{
 			give: outPtr{},
-			err:  "cannot build a result object by embedding *dig.Out, embed dig.Out instead: dig.outPtr embeds *dig.Out",
+			err:  "cannot build a result object by embedding *inject.Out, embed inject.Out instead: inject.outPtr embeds *inject.Out",
 		},
 		{
 			give: (*out)(nil),
-			err:  "cannot return a pointer to a result object, use a value instead: *dig.out is a pointer to a struct that embeds dig.Out",
+			err:  "cannot return a pointer to a result object, use a value instead: *inject.out is a pointer to a struct that embeds inject.Out",
 		},
 		{
 			give: in{},
-			err:  "cannot provide parameter objects: dig.in embeds a dig.In",
+			err:  "cannot provide parameter objects: inject.in embeds a inject.In",
 		},
 		{
 			give: inOut{},
-			err:  "cannot provide parameter objects: dig.inOut embeds a dig.In",
+			err:  "cannot provide parameter objects: inject.inOut embeds a inject.In",
 		},
 	}
 
@@ -208,7 +208,7 @@ func TestNewResultObjectErrors(t *testing.T) {
 
 				writer io.Writer
 			}{},
-			err: `unexported fields not allowed in dig.Out, did you mean to export "writer" (io.Writer)`,
+			err: `unexported fields not allowed in inject.Out, did you mean to export "writer" (io.Writer)`,
 		},
 		{
 			desc: "error field",
@@ -217,10 +217,10 @@ func TestNewResultObjectErrors(t *testing.T) {
 
 				Error error
 			}{},
-			err: `bad field "Error" of struct { dig.Out; Error error }: cannot return an error here, return it from the constructor instead`,
+			err: `bad field "Error" of struct { inject.Out; Error error }: cannot return an error here, return it from the constructor instead`,
 		},
 		{
-			desc: "nested dig.In",
+			desc: "nested inject.In",
 			give: struct {
 				Out
 

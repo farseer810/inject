@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"errors"
@@ -30,9 +30,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/farseer810/inject/internal/digreflect"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/dig/internal/digreflect"
 )
 
 // assertErrorMatches matches error messages against the provided list of
@@ -311,8 +311,8 @@ func TestMissingTypeFormatting(t *testing.T) {
 			give: missingType{
 				Key: key{t: reflect.TypeOf(type1{})},
 			},
-			wantV:     "dig.type1",
-			wantPlusV: "dig.type1 (did you mean to Provide it?)",
+			wantV:     "inject.type1",
+			wantPlusV: "inject.type1 (did you mean to Provide it?)",
 		},
 		{
 			desc: "one suggestion",
@@ -322,8 +322,8 @@ func TestMissingTypeFormatting(t *testing.T) {
 					{t: reflect.TypeOf(&type1{})},
 				},
 			},
-			wantV:     "dig.type1 (did you mean *dig.type1?)",
-			wantPlusV: "dig.type1 (did you mean to use *dig.type1?)",
+			wantV:     "inject.type1 (did you mean *inject.type1?)",
+			wantPlusV: "inject.type1 (did you mean to use *inject.type1?)",
 		},
 		{
 			desc: "many suggestions",
@@ -334,8 +334,8 @@ func TestMissingTypeFormatting(t *testing.T) {
 					{t: reflect.TypeOf(new(someInterface)).Elem()},
 				},
 			},
-			wantV:     "dig.type1 (did you mean *dig.type1, or dig.someInterface?)",
-			wantPlusV: "dig.type1 (did you mean to use one of *dig.type1, or dig.someInterface?)",
+			wantV:     "inject.type1 (did you mean *inject.type1, or inject.someInterface?)",
+			wantPlusV: "inject.type1 (did you mean to use one of *inject.type1, or inject.someInterface?)",
 		},
 	}
 
@@ -462,9 +462,9 @@ func TestErrorFormatting(t *testing.T) {
 				Key:    key{t: reflect.TypeOf(someType{})},
 				Reason: richError,
 			},
-			wantString: `failed to build dig.someType: great sadness`,
+			wantString: `failed to build inject.someType: great sadness`,
 			wantPlusV: joinLines(
-				`failed to build dig.someType:`,
+				`failed to build inject.someType:`,
 				"sadness so great",
 				"it needs multiple",
 				"lines",
@@ -476,9 +476,9 @@ func TestErrorFormatting(t *testing.T) {
 				Key:    key{t: reflect.TypeOf(someType{}), group: "items"},
 				Reason: richError,
 			},
-			wantString: `could not build value group dig.someType[group="items"]: great sadness`,
+			wantString: `could not build value group inject.someType[group="items"]: great sadness`,
 			wantPlusV: joinLines(
-				`could not build value group dig.someType[group="items"]:`,
+				`could not build value group inject.someType[group="items"]:`,
 				"sadness so great",
 				"it needs multiple",
 				"lines",
@@ -489,10 +489,10 @@ func TestErrorFormatting(t *testing.T) {
 			give: errMissingTypes{
 				{Key: key{t: reflect.TypeOf(someType{})}},
 			},
-			wantString: "missing type: dig.someType",
+			wantString: "missing type: inject.someType",
 			wantPlusV: joinLines(
 				"missing type:",
-				"	- dig.someType (did you mean to Provide it?)",
+				"	- inject.someType (did you mean to Provide it?)",
 			),
 		},
 		{
@@ -501,11 +501,11 @@ func TestErrorFormatting(t *testing.T) {
 				{Key: key{t: reflect.TypeOf(someType{})}},
 				{Key: key{t: reflect.TypeOf(&anotherType{})}},
 			},
-			wantString: "missing types: dig.someType; *dig.anotherType",
+			wantString: "missing types: inject.someType; *inject.anotherType",
 			wantPlusV: joinLines(
 				"missing types:",
-				"	- dig.someType (did you mean to Provide it?)",
-				"	- *dig.anotherType (did you mean to Provide it?)",
+				"	- inject.someType (did you mean to Provide it?)",
+				"	- *inject.anotherType (did you mean to Provide it?)",
 			),
 		},
 	}

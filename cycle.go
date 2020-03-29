@@ -18,13 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"bytes"
 	"fmt"
 
-	"go.uber.org/dig/internal/digreflect"
+	"github.com/farseer810/inject/internal/digreflect"
 )
 
 type cycleEntry struct {

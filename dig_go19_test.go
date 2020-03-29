@@ -20,7 +20,7 @@
 
 // +build go1.9
 
-package dig
+package inject
 
 import (
 	"bytes"
@@ -60,10 +60,10 @@ func TestEndToEndSuccessWithAliases(t *testing.T) {
 		err := c.Provide(func() B { return B{} })
 		require.Error(t, err, "B should fail to provide")
 		assertErrorMatches(t, err,
-			`cannot provide function "go.uber.org/dig".TestEndToEndSuccessWithAliases\S+`,
+			`cannot provide function "github.com/farseer810/inject".TestEndToEndSuccessWithAliases\S+`,
 			`dig_go19_test.go:\d+`, // file:line
-			`cannot provide dig.A from \[0\]:`,
-			`already provided by "go.uber.org/dig".TestEndToEndSuccessWithAliases\S+`,
+			`cannot provide inject.A from \[0\]:`,
+			`already provided by "github.com/farseer810/inject".TestEndToEndSuccessWithAliases\S+`,
 		)
 	})
 

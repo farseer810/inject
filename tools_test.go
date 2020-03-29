@@ -20,7 +20,7 @@
 
 // +build tools
 
-package dig
+package inject
 
 import (
 	_ "golang.org/x/lint/golint"

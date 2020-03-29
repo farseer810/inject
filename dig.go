@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"errors"
@@ -30,8 +30,8 @@ import (
 	"strings"
 	"time"
 
-	"go.uber.org/dig/internal/digreflect"
-	"go.uber.org/dig/internal/dot"
+	"github.com/farseer810/inject/internal/digreflect"
+	"github.com/farseer810/inject/internal/dot"
 )
 
 const (
@@ -325,7 +325,7 @@ func (c *Container) getProviders(k key) []provider {
 // In addition to accepting constructors that accept dependencies as separate
 // arguments and produce results as separate return values, Provide also
 // accepts constructors that specify dependencies as dig.In structs and/or
-// specify results as dig.Out structs.
+// specify results as inject.Out structs.
 func (c *Container) Provide(constructor interface{}, opts ...ProvideOption) error {
 	ctype := reflect.TypeOf(constructor)
 	if ctype == nil {
@@ -494,11 +494,11 @@ type connectionVisitor struct {
 	err *error
 
 	// Map of keys provided to path that provided this. The path is a string
-	// documenting which positional return value or dig.Out attribute is
+	// documenting which positional return value or inject.Out attribute is
 	// providing this particular key.
 	//
 	// For example, "[0].Foo" indicates that the value was provided by the Foo
-	// attribute of the dig.Out returned as the first result of the
+	// attribute of the inject.Out returned as the first result of the
 	// constructor.
 	keyPaths map[key]string
 
@@ -506,10 +506,10 @@ type connectionVisitor struct {
 	// be, ["[1]", "Foo", "Bar"] when we're visiting Bar in,
 	//
 	//   func() (io.Writer, struct {
-	//     dig.Out
+	//     inject.Out
 	//
 	//     Foo struct {
-	//       dig.Out
+	//       inject.Out
 	//
 	//       Bar io.Reader
 	//     }

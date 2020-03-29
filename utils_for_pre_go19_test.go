@@ -20,7 +20,7 @@
 
 // +build !go1.9
 
-package dig
+package inject
 
 import "reflect"
 

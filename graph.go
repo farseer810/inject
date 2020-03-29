@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package dig
+package inject
 
 import (
 	"io"
 	"strconv"
 	"text/template"
 
-	"go.uber.org/dig/internal/dot"
+	"github.com/farseer810/inject/internal/dot"
 )
 
 // A VisualizeOption modifies the default behavior of Visualize.
