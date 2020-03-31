@@ -45,7 +45,7 @@ func TestEndToEndSuccess(t *testing.T) {
 		require.NoError(t, c.Provide(func() *bytes.Buffer {
 			b = &bytes.Buffer{}
 			return b
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(func(got *bytes.Buffer) {
 			require.NotNil(t, got, "invoke got nil buffer")
 			require.True(t, got == b, "invoke got wrong buffer")
@@ -54,10 +54,10 @@ func TestEndToEndSuccess(t *testing.T) {
 
 	t.Run("nil pointer constructor", func(t *testing.T) {
 		// Dig shouldn't forbid this - it's perfectly reasonable to explicitly
-		// provide a typed nil, since that's often a convenient way to supply a
+		// provideWithConstructor a typed nil, since that's often a convenient way to supply a
 		// default no-op implementation.
 		c := New()
-		require.NoError(t, c.Provide(func() *bytes.Buffer { return nil }), "provide failed")
+		require.NoError(t, c.Provide(func() *bytes.Buffer { return nil }), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(func(b *bytes.Buffer) {
 			require.Nil(t, b, "expected to get nil buffer")
 		}), "invoke failed")
@@ -67,7 +67,7 @@ func TestEndToEndSuccess(t *testing.T) {
 		c := New()
 		var buf bytes.Buffer
 		buf.WriteString("foo")
-		require.NoError(t, c.Provide(func() bytes.Buffer { return buf }), "provide failed")
+		require.NoError(t, c.Provide(func() bytes.Buffer { return buf }), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(func(b bytes.Buffer) {
 			// ensure we're getting back the buffer we put in
 			require.Equal(t, "foo", buf.String(), "invoke got new buffer")
@@ -80,7 +80,7 @@ func TestEndToEndSuccess(t *testing.T) {
 		b2 := &bytes.Buffer{}
 		require.NoError(t, c.Provide(func() []*bytes.Buffer {
 			return []*bytes.Buffer{b1, b2}
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(func(bs []*bytes.Buffer) {
 			require.Equal(t, 2, len(bs), "invoke got unexpected number of buffers")
 			require.True(t, b1 == bs[0], "first item did not match")
@@ -91,7 +91,7 @@ func TestEndToEndSuccess(t *testing.T) {
 	t.Run("array constructor", func(t *testing.T) {
 		c := New()
 		bufs := [1]*bytes.Buffer{{}}
-		require.NoError(t, c.Provide(func() [1]*bytes.Buffer { return bufs }), "provide failed")
+		require.NoError(t, c.Provide(func() [1]*bytes.Buffer { return bufs }), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(func(bs [1]*bytes.Buffer) {
 			require.NotNil(t, bs[0], "invoke got new array")
 		}), "invoke failed")
@@ -101,7 +101,7 @@ func TestEndToEndSuccess(t *testing.T) {
 		c := New()
 		require.NoError(t, c.Provide(func() map[string]string {
 			return map[string]string{}
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(func(m map[string]string) {
 			require.NotNil(t, m, "invoke got zero value map")
 		}), "invoke failed")
@@ -111,7 +111,7 @@ func TestEndToEndSuccess(t *testing.T) {
 		c := New()
 		require.NoError(t, c.Provide(func() chan int {
 			return make(chan int)
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(func(ch chan int) {
 			require.NotNil(t, ch, "invoke got nil chan")
 		}), "invoke failed")
@@ -121,7 +121,7 @@ func TestEndToEndSuccess(t *testing.T) {
 		c := New()
 		require.NoError(t, c.Provide(func() func(int) {
 			return func(int) {}
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(func(f func(int)) {
 			require.NotNil(t, f, "invoke got nil function pointer")
 		}), "invoke failed")
@@ -131,7 +131,7 @@ func TestEndToEndSuccess(t *testing.T) {
 		c := New()
 		require.NoError(t, c.Provide(func() io.Writer {
 			return &bytes.Buffer{}
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(func(w io.Writer) {
 			require.NotNil(t, w, "invoke got nil interface")
 		}), "invoke failed")
@@ -150,11 +150,11 @@ func TestEndToEndSuccess(t *testing.T) {
 			c.Provide(func(args Args) *bytes.Buffer {
 				require.NotEmpty(t, args.Contents, "contents must not be empty")
 				return bytes.NewBufferString(string(args.Contents))
-			}), "provide constructor failed")
+			}), "provideWithConstructor constructor failed")
 
 		require.NoError(t,
 			c.Provide(func() contents { return "hello world" }),
-			"provide value failed")
+			"provideWithConstructor value failed")
 
 		require.NoError(t, c.Invoke(func(buff *bytes.Buffer) {
 			out, err := ioutil.ReadAll(buff)
@@ -167,7 +167,7 @@ func TestEndToEndSuccess(t *testing.T) {
 		c := New()
 		require.NoError(t, c.Provide(func() *bytes.Buffer {
 			return new(bytes.Buffer)
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 
 		type Args struct {
 			In
@@ -192,7 +192,7 @@ func TestEndToEndSuccess(t *testing.T) {
 			called = true
 			buff = new(bytes.Buffer)
 			return buff
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 
 		type MyParam struct{ In }
 
@@ -234,7 +234,7 @@ func TestEndToEndSuccess(t *testing.T) {
 			called = true
 			buff = new(bytes.Buffer)
 			return buff
-		}), "provide must not fail")
+		}), "provideWithConstructor must not fail")
 
 		require.NoError(t, c.Invoke(func(p someParam) {
 			require.True(t, called, "constructor must be called first")
@@ -256,7 +256,7 @@ func TestEndToEndSuccess(t *testing.T) {
 			assert.NotNil(t, b, "invoke got nil buffer")
 			assert.Equal(t, 1, len(nums), "invoke got empty slice")
 		}
-		require.NoError(t, c.Provide(constructor), "provide failed")
+		require.NoError(t, c.Provide(constructor), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(consumer), "invoke failed")
 	})
 
@@ -275,7 +275,7 @@ func TestEndToEndSuccess(t *testing.T) {
 		getB := func(b *B) {
 			assert.NotNil(t, b, "got nil B")
 		}
-		require.NoError(t, c.Provide(constructor), "provide failed")
+		require.NoError(t, c.Provide(constructor), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(getA), "A invoke failed")
 		require.NoError(t, c.Invoke(getB), "B invoke failed")
 		require.NoError(t, c.Invoke(func(a *A, b *B) {}), "AB invoke failed")
@@ -299,8 +299,8 @@ func TestEndToEndSuccess(t *testing.T) {
 			assert.NotNil(t, a, "got nil A")
 		}
 
-		require.NoError(t, c.Provide(cA), "provide failed")
-		require.NoError(t, c.Provide(cB), "provide failed")
+		require.NoError(t, c.Provide(cA), "provideWithConstructor failed")
+		require.NoError(t, c.Provide(cB), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(getA), "A invoke failed")
 	})
 
@@ -358,7 +358,7 @@ func TestEndToEndSuccess(t *testing.T) {
 		c := New()
 		require.NoError(t, c.Provide(func() Ret {
 			return Ret{A: myA, B: myB}
-		}), "provide for the Ret struct should succeed")
+		}), "provideWithConstructor for the Ret struct should succeed")
 		require.NoError(t, c.Invoke(func(a A, b *B) {
 			assert.Equal(t, a.name, "string A", "value type should work for inject.Out")
 			assert.Equal(t, b.name, "string B", "pointer should work for inject.Out")
@@ -384,7 +384,7 @@ func TestEndToEndSuccess(t *testing.T) {
 			require.Nil(t, p.T1, "T1 must be nil")
 			gave = &type2{}
 			return gave
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 
 		require.NoError(t, c.Invoke(func(got *type2) {
 			require.True(t, got == gave, "type2 reference must be the same")
@@ -410,12 +410,12 @@ func TestEndToEndSuccess(t *testing.T) {
 
 	t.Run("primitives", func(t *testing.T) {
 		c := New()
-		require.NoError(t, c.Provide(func() string { return "piper" }), "string provide failed")
-		require.NoError(t, c.Provide(func() int { return 42 }), "int provide failed")
-		require.NoError(t, c.Provide(func() int64 { return 24 }), "int provide failed")
+		require.NoError(t, c.Provide(func() string { return "piper" }), "string provideWithConstructor failed")
+		require.NoError(t, c.Provide(func() int { return 42 }), "int provideWithConstructor failed")
+		require.NoError(t, c.Provide(func() int64 { return 24 }), "int provideWithConstructor failed")
 		require.NoError(t, c.Provide(func() time.Duration {
 			return 10 * time.Second
-		}), "time.Duration provide failed")
+		}), "time.Duration provideWithConstructor failed")
 		require.NoError(t, c.Invoke(func(i64 int64, i int, s string, d time.Duration) {
 			assert.Equal(t, 42, i)
 			assert.Equal(t, int64(24), i64)
@@ -449,7 +449,7 @@ func TestEndToEndSuccess(t *testing.T) {
 				B: &B{},
 				C: C{},
 			}
-		}), "provide for the Ret struct should succeed")
+		}), "provideWithConstructor for the Ret struct should succeed")
 		require.NoError(t, c.Invoke(func(a *A, b *B, c C) {
 			require.NotNil(t, a, "*A should be part of the container through Ret2->Ret1")
 		}))
@@ -477,7 +477,7 @@ func TestEndToEndSuccess(t *testing.T) {
 		}
 		require.NoError(t, c.Provide(func() ret {
 			return ret{A1: A{1}, A2: A{2}, A3: A{3}}
-		}), "provide for three named instances should succeed")
+		}), "provideWithConstructor for three named instances should succeed")
 		require.NoError(t, c.Invoke(func(p param) {
 			assert.Equal(t, 1, p.A1.idx)
 			assert.Equal(t, 3, p.A3.idx)
@@ -593,7 +593,7 @@ func TestEndToEndSuccess(t *testing.T) {
 
 		require.NoError(t, c.Provide(func() retUno {
 			return retUno{A: A{1}}
-		}), `should be able to provide A[name="uno"]`)
+		}), `should be able to provideWithConstructor A[name="uno"]`)
 		require.NoError(t, c.Provide(func(p param) retDos {
 			return retDos{A: A{2}}
 		}), `A[name="dos"] should be able to rely on A[name="uno"]`)
@@ -625,10 +625,10 @@ func TestEndToEndSuccess(t *testing.T) {
 				A1: &A{1},
 				A2: &A{2},
 			}, nil
-		}), "should be able to provide A1 and A2 into the graph")
+		}), "should be able to provideWithConstructor A1 and A2 into the graph")
 		require.NoError(t, c.Provide(func(p param) *B {
 			return &B{sum: p.A1.idx + p.A2.idx}
-		}), "should be able to provide *B that relies on two named types")
+		}), "should be able to provideWithConstructor *B that relies on two named types")
 		require.NoError(t, c.Invoke(func(b *B) {
 			require.Equal(t, 3, b.sum)
 		}))
@@ -706,7 +706,7 @@ func TestEndToEndSuccess(t *testing.T) {
 			return gave
 		}
 
-		require.NoError(t, c.Provide(new1), "failed to provide constructor")
+		require.NoError(t, c.Provide(new1), "failed to provideWithConstructor constructor")
 
 		// We generate a struct that embeds inject.In.
 		//
@@ -783,7 +783,7 @@ func TestEndToEndSuccess(t *testing.T) {
 				return []reflect.Value{result}
 			},
 		)
-		require.NoError(t, c.Provide(fn.Interface()), "provide failed")
+		require.NoError(t, c.Provide(fn.Interface()), "provideWithConstructor failed")
 
 		type params struct {
 			In
@@ -809,11 +809,11 @@ func TestEndToEndSuccess(t *testing.T) {
 		require.NoError(t, c.Provide(func() *A {
 			gaveA = &A{}
 			return gaveA
-		}), "failed to provide A")
+		}), "failed to provideWithConstructor A")
 
 		require.NoError(t, c.Provide(func() []*A {
 			panic("[]*A constructor must not be called.")
-		}), "failed to provide A slice")
+		}), "failed to provideWithConstructor A slice")
 
 		require.NoError(t, c.Invoke(func(a *A, as ...*A) {
 			require.NotNil(t, a, "A must not be nil")
@@ -832,11 +832,11 @@ func TestEndToEndSuccess(t *testing.T) {
 		require.NoError(t, c.Provide(func() *A {
 			gaveA = &A{}
 			return gaveA
-		}), "failed to provide A")
+		}), "failed to provideWithConstructor A")
 
 		require.NoError(t, c.Provide(func() []*A {
 			panic("[]*A constructor must not be called.")
-		}), "failed to provide A slice")
+		}), "failed to provideWithConstructor A slice")
 
 		var gaveB *B
 		require.NoError(t, c.Provide(func(a *A, as ...*A) *B {
@@ -845,7 +845,7 @@ func TestEndToEndSuccess(t *testing.T) {
 			require.Empty(t, as, "varargs must be empty")
 			gaveB = &B{}
 			return gaveB
-		}), "failed to provide B")
+		}), "failed to provideWithConstructor B")
 
 		require.NoError(t, c.Invoke(func(b *B) {
 			require.NotNil(t, b, "B must not be nil")
@@ -899,7 +899,7 @@ func TestGroups(t *testing.T) {
 		provide := func(i int) {
 			require.NoError(t, c.Provide(func() out {
 				return out{Value: i}
-			}), "failed to provide ")
+			}), "failed to provideWithConstructor ")
 		}
 
 		provide(1)
@@ -923,7 +923,7 @@ func TestGroups(t *testing.T) {
 		provide := func(i int) {
 			require.NoError(t, c.Provide(func() int {
 				return i
-			}, Group("val")), "failed to provide ")
+			}, Group("val")), "failed to provideWithConstructor ")
 		}
 
 		provide(1)
@@ -947,7 +947,7 @@ func TestGroups(t *testing.T) {
 		provide := func(i int, s string) {
 			require.NoError(t, c.Provide(func() (int, string) {
 				return i, s
-			}, Group("val")), "failed to provide ")
+			}, Group("val")), "failed to provideWithConstructor ")
 		}
 
 		provide(1, "a")
@@ -998,7 +998,7 @@ func TestGroups(t *testing.T) {
 			require.NoError(t, c.Provide(func() out {
 				calls[i]++
 				return out{Result: i}
-			}), "failed to provide")
+			}), "failed to provideWithConstructor")
 		}
 
 		provide("foo")
@@ -1042,7 +1042,7 @@ func TestGroups(t *testing.T) {
 		provideStrings := func(strings ...string) {
 			require.NoError(t, c.Provide(func() out {
 				return out{Result: strings}
-			}), "failed to provide")
+			}), "failed to provideWithConstructor")
 		}
 
 		provideStrings("1", "2")
@@ -1063,7 +1063,7 @@ func TestGroups(t *testing.T) {
 				}
 			}
 			return m
-		}), "failed to provide set constructor")
+		}), "failed to provideWithConstructor set constructor")
 
 		require.NoError(t, c.Invoke(func(got map[string]struct{}) {
 			assert.Equal(t, map[string]struct{}{
@@ -1073,7 +1073,7 @@ func TestGroups(t *testing.T) {
 		}), "failed to invoke")
 	})
 
-	t.Run("provide multiple values", func(t *testing.T) {
+	t.Run("provideWithConstructor multiple values", func(t *testing.T) {
 		c := New(setRand(rand.New(rand.NewSource(0))))
 
 		type outInt struct {
@@ -1084,7 +1084,7 @@ func TestGroups(t *testing.T) {
 		provideInt := func(i int) {
 			require.NoError(t, c.Provide(func() (outInt, error) {
 				return outInt{Int: i}, nil
-			}), "failed to provide int")
+			}), "failed to provideWithConstructor int")
 		}
 
 		type outString struct {
@@ -1095,7 +1095,7 @@ func TestGroups(t *testing.T) {
 		provideString := func(s string) {
 			require.NoError(t, c.Provide(func() outString {
 				return outString{String: s}
-			}), "failed to provide string")
+			}), "failed to provideWithConstructor string")
 		}
 
 		type outBoth struct {
@@ -1108,7 +1108,7 @@ func TestGroups(t *testing.T) {
 		provideBoth := func(i int, s string) {
 			require.NoError(t, c.Provide(func() (outBoth, error) {
 				return outBoth{Int: i, String: s}, nil
-			}), "failed to provide both")
+			}), "failed to provideWithConstructor both")
 		}
 
 		provideInt(1)
@@ -1148,7 +1148,7 @@ func TestGroups(t *testing.T) {
 		provide := func(i string) {
 			require.NoError(t, c.Provide(func() out {
 				return out{Result: i}
-			}), "failed to provide")
+			}), "failed to provideWithConstructor")
 		}
 
 		provide("a")
@@ -1186,17 +1186,17 @@ func TestGroups(t *testing.T) {
 
 		require.NoError(t, c.Provide(func() (out, error) {
 			return out{Result: "foo"}, nil
-		}), "failed to provide")
+		}), "failed to provideWithConstructor")
 
 		var gaveErr error
 		require.NoError(t, c.Provide(func() (out, error) {
 			gaveErr = errors.New("great sadness")
 			return out{}, gaveErr
-		}), "failed to provide")
+		}), "failed to provideWithConstructor")
 
 		require.NoError(t, c.Provide(func() out {
 			return out{Result: "bar"}
-		}), "failed to provide")
+		}), "failed to provideWithConstructor")
 
 		type in struct {
 			In
@@ -1228,7 +1228,7 @@ func TestProvideConstructorErrors(t *testing.T) {
 		constructor := func() (*A, *A, error) {
 			return &A{}, &A{}, nil
 		}
-		require.Error(t, c.Provide(constructor), "provide failed")
+		require.Error(t, c.Provide(constructor), "provideWithConstructor failed")
 	})
 
 	t.Run("constructor consumes a inject.Out", func(t *testing.T) {
@@ -1270,9 +1270,9 @@ func TestProvideConstructorErrors(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.desc, func(t *testing.T) {
 				err := c.Provide(tt.constructor)
-				require.Error(t, err, "provide should fail")
+				require.Error(t, err, "provideWithConstructor should fail")
 				assertErrorMatches(t, err,
-					`cannot provide function "github.com/farseer810/inject".TestProvideConstructorErrors\S+`,
+					`cannot provideWithConstructor function "github.com/farseer810/inject".TestProvideConstructorErrors\S+`,
 					`dig_test.go:\d+`, // file:line
 					`bad argument 1:`,
 					`cannot depend on result objects:`,
@@ -1296,7 +1296,7 @@ func TestProvideConstructorErrors(t *testing.T) {
 		}, Name("second"))
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestProvideConstructorErrors\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestProvideConstructorErrors\S+`,
 			`dig_test.go:\d+`, // file:line
 			`bad result 1:`,
 			"cannot specify a name for result objects:",
@@ -1325,7 +1325,7 @@ func TestProvideConstructorErrors(t *testing.T) {
 		require.Error(t, err)
 
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestProvideConstructorErrors\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestProvideConstructorErrors\S+`,
 			`dig_test.go:\d+`, // file:line
 			`bad field "Result1" of inject.Result2:`,
 			"cannot specify a name for result objects:",
@@ -1339,7 +1339,7 @@ func TestProvideRespectsConstructorErrors(t *testing.T) {
 		c := New()
 		require.NoError(t, c.Provide(func() (*bytes.Buffer, error) {
 			return &bytes.Buffer{}, nil
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 		require.NoError(t, c.Invoke(func(b *bytes.Buffer) {
 			require.NotNil(t, b, "invoke got nil buffer")
 		}), "invoke failed")
@@ -1348,7 +1348,7 @@ func TestProvideRespectsConstructorErrors(t *testing.T) {
 		c := New()
 		require.NoError(t, c.Provide(func() (*bytes.Buffer, error) {
 			return nil, errors.New("oh no")
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 
 		var called bool
 		err := c.Invoke(func(b *bytes.Buffer) { called = true })
@@ -1499,12 +1499,12 @@ func TestCantProvideParameterObjects(t *testing.T) {
 		err := c.Provide(func() (Args, error) {
 			panic("great sadness")
 		})
-		require.Error(t, err, "provide should fail")
+		require.Error(t, err, "provideWithConstructor should fail")
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestCantProvideParameterObjects\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestCantProvideParameterObjects\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad result 1:",
-			`cannot provide parameter objects:`,
+			`cannot provideWithConstructor parameter objects:`,
 			`inject.Args embeds a inject.In`,
 		)
 	})
@@ -1518,10 +1518,10 @@ func TestCantProvideParameterObjects(t *testing.T) {
 		err := c.Provide(func() (*Args, error) { return args, nil })
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestCantProvideParameterObjects\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestCantProvideParameterObjects\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad result 1:",
-			`cannot provide parameter objects:`,
+			`cannot provideWithConstructor parameter objects:`,
 			`\*inject.Args embeds a inject.In`,
 		)
 	})
@@ -1538,14 +1538,14 @@ func TestProvideKnownTypesFails(t *testing.T) {
 	for _, first := range provideArgs {
 		t.Run(fmt.Sprintf("%T", first), func(t *testing.T) {
 			c := New()
-			require.NoError(t, c.Provide(first), "first provide must not fail")
+			require.NoError(t, c.Provide(first), "first provideWithConstructor must not fail")
 
 			for _, second := range provideArgs {
-				assert.Error(t, c.Provide(second), "second provide must fail")
+				assert.Error(t, c.Provide(second), "second provideWithConstructor must fail")
 			}
 		})
 	}
-	t.Run("provide constructor twice", func(t *testing.T) {
+	t.Run("provideWithConstructor constructor twice", func(t *testing.T) {
 		c := New()
 		assert.NoError(t, c.Provide(func() *bytes.Buffer { return nil }))
 		assert.Error(t, c.Provide(func() *bytes.Buffer { return nil }))
@@ -1573,7 +1573,7 @@ func TestProvideCycleFails(t *testing.T) {
 		require.Error(t, err, "expected error when introducing cycle")
 		require.True(t, IsCycleDetected(err))
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestProvideCycleFails.\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestProvideCycleFails.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`this function introduces a cycle:`,
 			`\*inject.C provided by "github.com/farseer810/inject".TestProvideCycleFails\S+ \(\S+\)`,
@@ -1620,7 +1620,7 @@ func TestProvideCycleFails(t *testing.T) {
 		require.Error(t, err, "expected error when introducing cycle")
 		require.True(t, IsCycleDetected(err))
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestProvideCycleFails.\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestProvideCycleFails.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`this function introduces a cycle:`,
 			`inject.C provided by "github.com/farseer810/inject".TestProvideCycleFails\S+ \(\S+\)`,
@@ -1691,7 +1691,7 @@ func TestProvideCycleFails(t *testing.T) {
 		require.Error(t, err)
 		require.True(t, IsCycleDetected(err))
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestProvideCycleFails.\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestProvideCycleFails.\S+`,
 			`dig_test.go:\d+`, // file:line
 			`this function introduces a cycle:`,
 			`\*inject.D provided by "github.com/farseer810/inject".TestProvideCycleFails\S+ \(\S+\)`,
@@ -1737,7 +1737,7 @@ func TestIncompleteGraphIsOkay(t *testing.T) {
 	t.Parallel()
 
 	// A <- B <- C
-	// Even if we don't provide B, we should be able to resolve A.
+	// Even if we don't provideWithConstructor B, we should be able to resolve A.
 	type A struct{}
 	type B struct{}
 	type C struct{}
@@ -1745,8 +1745,8 @@ func TestIncompleteGraphIsOkay(t *testing.T) {
 	newC := func(*B) *C { return &C{} }
 
 	c := New()
-	assert.NoError(t, c.Provide(newA), "provide failed")
-	assert.NoError(t, c.Provide(newC), "provide failed")
+	assert.NoError(t, c.Provide(newA), "provideWithConstructor failed")
+	assert.NoError(t, c.Provide(newC), "provideWithConstructor failed")
 	assert.NoError(t, c.Invoke(func(*A) {}), "invoke failed")
 }
 
@@ -1830,16 +1830,16 @@ func TestProvideFailures(t *testing.T) {
 				A3: A{idx: 3},
 			}
 		})
-		require.Error(t, err, "provide must return error")
+		require.Error(t, err, "provideWithConstructor must return error")
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestProvideFailures\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestProvideFailures\S+`,
 			`dig_test.go:\d+`, // file:line
-			`cannot provide inject.A from \[0\].A2:`,
+			`cannot provideWithConstructor inject.A from \[0\].A2:`,
 			`already provided by \[0\].A1`,
 		)
 	})
 
-	t.Run("provide multiple instances with the same name", func(t *testing.T) {
+	t.Run("provideWithConstructor multiple instances with the same name", func(t *testing.T) {
 		c := New()
 		type A struct{}
 		type ret1 struct {
@@ -1856,11 +1856,11 @@ func TestProvideFailures(t *testing.T) {
 		err := c.Provide(func() ret2 {
 			return ret2{A: &A{}}
 		})
-		require.Error(t, err, "expected error on the second provide")
+		require.Error(t, err, "expected error on the second provideWithConstructor")
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestProvideFailures\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestProvideFailures\S+`,
 			`dig_test.go:\d+`, // file:line
-			`cannot provide \*inject.A\[name="foo"\] from \[0\].A:`,
+			`cannot provideWithConstructor \*inject.A\[name="foo"\] from \[0\].A:`,
 			`already provided by "github.com/farseer810/inject".TestProvideFailures\S+`,
 		)
 	})
@@ -1878,7 +1878,7 @@ func TestProvideFailures(t *testing.T) {
 		err := c.Provide(func() out1 { return out1{a2: A{77}} })
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestProvideFailures\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestProvideFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad result 1:",
 			`bad field "a2" of inject.out1:`,
@@ -1896,7 +1896,7 @@ func TestProvideFailures(t *testing.T) {
 		err := c.Provide(func() *out { return &out{String: "foo"} })
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestProvideFailures\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestProvideFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad result 1:",
 			`cannot return a pointer to a result object, use a value instead:`,
@@ -1916,7 +1916,7 @@ func TestProvideFailures(t *testing.T) {
 		err := c.Provide(func() out { return out{String: "foo"} })
 		require.Error(t, err)
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestProvideFailures\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestProvideFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad result 1:",
 			`cannot build a result object by embedding \*inject.Out, embed inject.Out instead:`,
@@ -2015,7 +2015,7 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.NoError(t, c.Provide(func(p param) *type3 {
 			panic("function must not be called")
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 
 		err := c.Invoke(func(*type3) {
 			t.Fatal("function must not be called")
@@ -2043,11 +2043,11 @@ func TestInvokeFailures(t *testing.T) {
 
 		require.NoError(t, c.Provide(func() type2 {
 			panic("function must not be called")
-		}), "provide should not fail")
+		}), "provideWithConstructor should not fail")
 
 		require.NoError(t, c.Provide(func(type1, *type2) type3 {
 			panic("function must not be called")
-		}), "provide should not fail")
+		}), "provideWithConstructor should not fail")
 
 		err := c.Invoke(func(type3) {
 			t.Fatal("function must not be called")
@@ -2105,9 +2105,9 @@ func TestInvokeFailures(t *testing.T) {
 			panic("function must not be called")
 		})
 
-		require.Error(t, err, "expected provide error")
+		require.Error(t, err, "expected provideWithConstructor error")
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestInvokeFailures\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestInvokeFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad argument 1:",
 			`bad field "Args" of inject.args:`,
@@ -2133,7 +2133,7 @@ func TestInvokeFailures(t *testing.T) {
 		err := c.Provide(func(missing) *dep {
 			panic("constructor for *dep should not be called")
 		})
-		require.NoError(t, err, "unexpected provide error")
+		require.NoError(t, err, "unexpected provideWithConstructor error")
 
 		// Should still be able to invoke a function that takes params, since *dep
 		// is optional.
@@ -2162,12 +2162,12 @@ func TestInvokeFailures(t *testing.T) {
 		err := c.Provide(func() (*failed, error) {
 			return nil, errFailed
 		})
-		require.NoError(t, err, "unexpected provide error")
+		require.NoError(t, err, "unexpected provideWithConstructor error")
 
 		err = c.Provide(func(*failed) *dep {
 			panic("constructor for *dep should not be called")
 		})
-		require.NoError(t, err, "unexpected provide error")
+		require.NoError(t, err, "unexpected provideWithConstructor error")
 
 		// Should still be able to invoke a function that takes params, since *dep
 		// is optional.
@@ -2219,7 +2219,7 @@ func TestInvokeFailures(t *testing.T) {
 		require.NoError(t, c.Provide(func() ret { return ret{A: A{}} }))
 		require.NoError(t, c.Invoke(func(param1) {}))
 		err := c.Invoke(func(param2) {})
-		require.Error(t, err, "provide should return error since cases don't match")
+		require.Error(t, err, "provideWithConstructor should return error since cases don't match")
 		assertErrorMatches(t, err,
 			`missing dependencies for function "github.com/farseer810/inject".TestInvokeFailures\S+`,
 			`dig_test.go:\d+`, // file:line
@@ -2258,7 +2258,7 @@ func TestInvokeFailures(t *testing.T) {
 		err := c.Provide(func(in) int { return 0 })
 		require.Error(t, err, "Provide must fail")
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestInvokeFailures\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestInvokeFailures\S+`,
 			`dig_test.go:\d+`, // file:line
 			"bad argument 1:",
 			`bad field "foo" of inject.in:`,
@@ -2670,7 +2670,7 @@ func TestNodeAlreadyCalled(t *testing.T) {
 	type type1 struct{}
 	f := func() type1 { return type1{} }
 
-	n, err := newNode(f, nodeOptions{})
+	n, err := newNodeWithConstructor(f, nodeOptions{})
 	require.NoError(t, err, "failed to build node")
 	require.False(t, n.called, "node must not have been called")
 
@@ -2686,7 +2686,7 @@ func TestFailingFunctionDoesNotCreateInvalidState(t *testing.T) {
 	c := New()
 	require.NoError(t, c.Provide(func() (type1, error) {
 		return type1{}, errors.New("great sadness")
-	}), "provide failed")
+	}), "provideWithConstructor failed")
 
 	require.Error(t, c.Invoke(func(type1) {
 		require.FailNow(t, "first invoke must not call the function")

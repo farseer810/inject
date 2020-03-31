@@ -40,7 +40,7 @@ func TestEndToEndSuccessWithAliases(t *testing.T) {
 		require.NoError(t, c.Provide(func() *bytes.Buffer {
 			b = &bytes.Buffer{}
 			return b
-		}), "provide failed")
+		}), "provideWithConstructor failed")
 
 		require.NoError(t, c.Invoke(func(got Buffer) {
 			require.NotNil(t, got, "invoke got nil buffer")
@@ -48,21 +48,21 @@ func TestEndToEndSuccessWithAliases(t *testing.T) {
 		}), "invoke failed")
 	})
 
-	t.Run("duplicate provide", func(t *testing.T) {
+	t.Run("duplicate provideWithConstructor", func(t *testing.T) {
 		type A struct{}
 		type B = A
 
 		c := New()
 		require.NoError(t, c.Provide(func() A {
 			return A{}
-		}), "A should not fail to provide")
+		}), "A should not fail to provideWithConstructor")
 
 		err := c.Provide(func() B { return B{} })
-		require.Error(t, err, "B should fail to provide")
+		require.Error(t, err, "B should fail to provideWithConstructor")
 		assertErrorMatches(t, err,
-			`cannot provide function "github.com/farseer810/inject".TestEndToEndSuccessWithAliases\S+`,
+			`cannot provideWithConstructor function "github.com/farseer810/inject".TestEndToEndSuccessWithAliases\S+`,
 			`dig_go19_test.go:\d+`, // file:line
-			`cannot provide inject.A from \[0\]:`,
+			`cannot provideWithConstructor inject.A from \[0\]:`,
 			`already provided by "github.com/farseer810/inject".TestEndToEndSuccessWithAliases\S+`,
 		)
 	})
@@ -98,7 +98,7 @@ func TestEndToEndSuccessWithAliases(t *testing.T) {
 		}
 		require.NoError(t, c.Provide(func() ret {
 			return ret{A: A2{"a"}, B: A3{"b"}, C: A1{"c"}}
-		}), "provide for three named instances should succeed")
+		}), "provideWithConstructor for three named instances should succeed")
 
 		require.NoError(t, c.Invoke(func(p param) {
 			assert.Equal(t, "a", p.A1.s, "A1 should match")

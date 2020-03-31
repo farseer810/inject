@@ -134,7 +134,7 @@ func walkParam(p param, v paramVisitor) {
 		panic(fmt.Sprintf(
 			"It looks like you have found a bug in inject. "+
 				"Please file an issue at https://github.com/uber-go/dig/issues/ "+
-				"and provide the following message: "+
+				"and provideWithConstructor the following message: "+
 				"received unknown param type %T", p))
 	}
 }
@@ -188,7 +188,7 @@ func newParamList(ctype reflect.Type) (paramList, error) {
 func (pl paramList) Build(containerStore) (reflect.Value, error) {
 	panic("It looks like you have found a bug in inject. " +
 		"Please file an issue at https://github.com/uber-go/dig/issues/ " +
-		"and provide the following message: " +
+		"and provideWithConstructor the following message: " +
 		"paramList.Build() must never be called")
 }
 

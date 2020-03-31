@@ -135,7 +135,7 @@ func TestParamGroupSliceErrors(t *testing.T) {
 				`field "Foo" (string) is not a slice`,
 		},
 		{
-			desc: "cannot provide name for a group",
+			desc: "cannot provideWithConstructor name for a group",
 			shape: struct {
 				In
 

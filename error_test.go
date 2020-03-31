@@ -406,9 +406,9 @@ func TestErrorFormatting(t *testing.T) {
 				Func:   someFunc,
 				Reason: simpleErr,
 			},
-			wantString: `cannot provide function "foo".Bar (foo/bar.go:42): great sadness`,
+			wantString: `cannot provideWithConstructor function "foo".Bar (foo/bar.go:42): great sadness`,
 			wantPlusV: joinLines(
-				`cannot provide function "foo".Bar`,
+				`cannot provideWithConstructor function "foo".Bar`,
 				"	foo/bar.go:42:",
 				"great sadness",
 			),

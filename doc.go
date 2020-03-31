@@ -233,7 +233,7 @@
 //   func NewReadOnlyConnection(...) (*sql.DB, error)
 //   func NewReadWriteConnection(...) (*sql.DB, error)
 //
-// You can provide *sql.DB into a Container under different names by passing
+// You can provideWithConstructor *sql.DB into a Container under different names by passing
 // the inject.Name option.
 //
 //   c.Provide(NewReadOnlyConnection, inject.Name("ro"))
@@ -310,10 +310,10 @@
 //     ..
 //   }
 //
-// Any number of constructors may provide values to this named collection.
+// Any number of constructors may provideWithConstructor values to this named collection.
 // Other constructors can request all values for this collection by requesting
 // a slice tagged with `group:".."`. This will execute all constructors that
-// provide a value to that group in an unspecified order.
+// provideWithConstructor a value to that group in an unspecified order.
 //
 //   type ServerParams struct {
 //     inject.In

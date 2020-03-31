@@ -56,7 +56,7 @@ func TestNewResultListErrors(t *testing.T) {
 			require.Error(t, err)
 			assertErrorMatches(t, err,
 				"bad result 1:",
-				"cannot provide parameter objects:",
+				"cannot provideWithConstructor parameter objects:",
 				"embeds a inject.In")
 		})
 	}
@@ -95,11 +95,11 @@ func TestNewResultErrors(t *testing.T) {
 		},
 		{
 			give: in{},
-			err:  "cannot provide parameter objects: inject.in embeds a inject.In",
+			err:  "cannot provideWithConstructor parameter objects: inject.in embeds a inject.In",
 		},
 		{
 			give: inOut{},
-			err:  "cannot provide parameter objects: inject.inOut embeds a inject.In",
+			err:  "cannot provideWithConstructor parameter objects: inject.inOut embeds a inject.In",
 		},
 	}
 

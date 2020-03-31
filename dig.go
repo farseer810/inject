@@ -102,7 +102,7 @@ func (f provideOptionFunc) applyProvideOption(opts *provideOptions) { f(opts) }
 //   func NewReadOnlyConnection(...) (*Connection, error)
 //   func NewReadWriteConnection(...) (*Connection, error)
 //
-// The following will provide two connections to the container: one under the
+// The following will provideWithConstructor two connections to the container: one under the
 // name "ro" and the other under the name "rw".
 //
 //   c.Provide(NewReadOnlyConnection, inject.Name("ro"))
@@ -136,7 +136,7 @@ type InvokeOption interface {
 
 // Container is a directed acyclic graph of types and their dependencies.
 type Container struct {
-	// Mapping from key to all the nodes that can provide a value for that
+	// Mapping from key to all the nodes that can provideWithConstructor a value for that
 	// key.
 	providers map[key][]*node
 
@@ -155,8 +155,10 @@ type Container struct {
 	// Flag indicating whether the graph has been checked for cycles.
 	isVerifiedAcyclic bool
 
-	// Defer acyclic check on provide until Invoke.
+	// Defer acyclic check on provideWithConstructor until Invoke.
 	deferAcyclicVerification bool
+
+	requiredValuePointers []interface{}
 }
 
 // containerWriter provides write access to the Container's underlying data
@@ -252,7 +254,7 @@ func DeferAcyclicVerification() Option {
 
 // Changes the source of randomness for the container.
 //
-// This will help provide determinism during tests.
+// This will help provideWithConstructor determinism during tests.
 func setRand(r *rand.Rand) Option {
 	return optionFunc(func(c *Container) {
 		c.rand = r
@@ -343,10 +345,44 @@ func (c *Container) Provide(constructor interface{}, opts ...ProvideOption) erro
 		return err
 	}
 
-	if err := c.provide(constructor, options); err != nil {
+	if err := c.provideWithConstructor(constructor, options); err != nil {
 		return errProvide{
 			Func:   digreflect.InspectFunc(constructor),
 			Reason: err,
+		}
+	}
+	return nil
+}
+
+func (c *Container) ProvideWithValue(value interface{}, opts ...ProvideOption) error {
+	vtype := reflect.TypeOf(value)
+	if vtype == nil {
+		return errors.New("can't provide an untyped nil")
+	}
+
+	var options provideOptions
+	for _, o := range opts {
+		o.applyProvideOption(&options)
+	}
+	if err := options.Validate(); err != nil {
+		return err
+	}
+
+	if err := c.provideWithValue(value, options); err != nil {
+		return errProvide{
+			Func:   digreflect.InspectFunc(value),
+			Reason: err,
+		}
+	}
+	return nil
+}
+
+func (c *Container) ProvideWithValues(values ...interface{}) error {
+	var err error
+	for i, value := range values {
+		err = c.ProvideWithValue(value)
+		if err != nil {
+			return fmt.Errorf("the %dth value is failed to provided(%v)", i+1, err)
 		}
 	}
 	return nil
@@ -407,6 +443,90 @@ func (c *Container) Invoke(function interface{}, opts ...InvokeOption) error {
 	return nil
 }
 
+// GetValues takes pointers of required dependencies.
+//
+// All pointers are treated as its dependencies. The dependencies are instantiated
+// in an unspecified order along with any dependencies that they might have.
+// Required dependencies will be populated after calling Populate()
+func (c *Container) GetValues(pointers ...interface{}) error {
+	numValues := len(pointers)
+	if numValues == 0 {
+		return nil
+	}
+
+	for i, pointer := range pointers {
+		if reflect.TypeOf(pointer).Kind() != reflect.Ptr {
+			return fmt.Errorf("the %dth value is not a pointer", i+1)
+		}
+		if pointer == nil {
+			return fmt.Errorf("the %dth value is a nil pointer", i+1)
+		}
+	}
+
+	// pre-check param creation
+	pl := paramList{
+		ctype:  nil,
+		Params: make([]param, 0, len(pointers)),
+	}
+
+	for i, pointer := range pointers {
+		p, err := newParam(reflect.TypeOf(pointer).Elem())
+		if err != nil {
+			return errf("bad argument %d %v", i+1, err)
+		}
+		pl.Params = append(pl.Params, p)
+	}
+
+	c.requiredValuePointers = append(c.requiredValuePointers, pointers...)
+	return nil
+}
+
+// Populate populates all required dependencies given by GetValues()
+// A nil error is returned only if all required dependencies are valid.
+func (c *Container) Populate() error {
+	pointers := c.requiredValuePointers
+	if pointers == nil {
+		return nil
+	}
+
+	numValues := len(pointers)
+	pl := paramList{
+		ctype:  nil,
+		Params: make([]param, 0, len(pointers)),
+	}
+
+	for _, pointer := range pointers {
+		p, err := newParam(reflect.TypeOf(pointer).Elem())
+		if err != nil {
+			return errf("bad argument %v", err)
+		}
+		pl.Params = append(pl.Params, p)
+	}
+
+	if err := shallowCheckDependencies(c, pl); err != nil {
+		return err
+	}
+
+	if !c.isVerifiedAcyclic {
+		if err := c.verifyAcyclic(); err != nil {
+			return err
+		}
+	}
+
+	values, err := pl.BuildList(c)
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < numValues; i++ {
+		pointer := pointers[i]
+		value := values[i]
+		reflect.ValueOf(pointer).Elem().Set(value)
+	}
+	c.requiredValuePointers = nil
+	return nil
+}
+
 func (c *Container) verifyAcyclic() error {
 	visited := make(map[key]struct{})
 	for _, n := range c.nodes {
@@ -419,8 +539,8 @@ func (c *Container) verifyAcyclic() error {
 	return nil
 }
 
-func (c *Container) provide(ctor interface{}, opts provideOptions) error {
-	n, err := newNode(
+func (c *Container) provideWithConstructor(ctor interface{}, opts provideOptions) error {
+	n, err := newNodeWithConstructor(
 		ctor,
 		nodeOptions{
 			ResultName:  opts.Name,
@@ -457,7 +577,42 @@ func (c *Container) provide(ctor interface{}, opts provideOptions) error {
 	}
 
 	c.nodes = append(c.nodes, n)
+	return nil
+}
 
+func (c *Container) provideWithValue(value interface{}, opts provideOptions) error {
+	n, err := newNodeWithValue(
+		value,
+		nodeOptions{
+			ResultName:  opts.Name,
+			ResultGroup: opts.Group,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	keys, err := c.findAndValidateResults(n)
+	if err != nil {
+		return err
+	}
+
+	for k := range keys {
+		c.isVerifiedAcyclic = false
+		oldProviders := c.providers[k]
+		c.providers[k] = append(c.providers[k], n)
+
+		if c.deferAcyclicVerification {
+			continue
+		}
+		if err := verifyAcyclic(c, n, k); err != nil {
+			c.providers[k] = oldProviders
+			return err
+		}
+		c.isVerifiedAcyclic = true
+	}
+
+	c.nodes = append(c.nodes, n)
 	return nil
 }
 
@@ -541,7 +696,7 @@ func (cv connectionVisitor) Visit(res result) resultVisitor {
 
 		if conflict, ok := cv.keyPaths[k]; ok {
 			*cv.err = errf(
-				"cannot provide %v from %v", k, path,
+				"cannot provideWithConstructor %v from %v", k, path,
 				"already provided by %v", conflict,
 			)
 			return nil
@@ -554,7 +709,7 @@ func (cv connectionVisitor) Visit(res result) resultVisitor {
 			}
 
 			*cv.err = errf(
-				"cannot provide %v from %v", k, path,
+				"cannot provideWithConstructor %v from %v", k, path,
 				"already provided by %v", strings.Join(cons, "; "),
 			)
 			return nil
@@ -597,6 +752,8 @@ type node struct {
 
 	// Type information about constructor results.
 	resultList resultList
+
+	isValue bool
 }
 
 type nodeOptions struct {
@@ -606,7 +763,7 @@ type nodeOptions struct {
 	ResultGroup string
 }
 
-func newNode(ctor interface{}, opts nodeOptions) (*node, error) {
+func newNodeWithConstructor(ctor interface{}, opts nodeOptions) (*node, error) {
 	cval := reflect.ValueOf(ctor)
 	ctype := cval.Type()
 	cptr := cval.Pointer()
@@ -637,6 +794,36 @@ func newNode(ctor interface{}, opts nodeOptions) (*node, error) {
 	}, err
 }
 
+func newNodeWithValue(value interface{}, opts nodeOptions) (*node, error) {
+	vval := reflect.ValueOf(value)
+	vtype := vval.Type()
+
+	params := paramList{
+		ctype:  nil,
+		Params: make([]param, 0),
+	}
+
+	results, err := newResultListWithValue(
+		vtype,
+		resultOptions{
+			Name:  opts.ResultName,
+			Group: opts.ResultGroup,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return &node{
+		ctor:       value,
+		ctype:      vtype,
+		location:   nil,
+		id:         dot.CtorID(0),
+		paramList:  params,
+		resultList: results,
+		isValue:    true,
+	}, err
+}
+
 func (n *node) Location() *digreflect.Func { return n.location }
 func (n *node) ParamList() paramList       { return n.paramList }
 func (n *node) ResultList() resultList     { return n.resultList }
@@ -649,23 +836,29 @@ func (n *node) Call(c containerStore) error {
 		return nil
 	}
 
-	if err := shallowCheckDependencies(c, n.paramList); err != nil {
-		return errMissingDependencies{
-			Func:   n.location,
-			Reason: err,
+	var results []reflect.Value
+	if n.isValue {
+		results = []reflect.Value{reflect.ValueOf(n.ctor)}
+	} else {
+		if err := shallowCheckDependencies(c, n.paramList); err != nil {
+			return errMissingDependencies{
+				Func:   n.location,
+				Reason: err,
+			}
 		}
-	}
 
-	args, err := n.paramList.BuildList(c)
-	if err != nil {
-		return errArgumentsFailed{
-			Func:   n.location,
-			Reason: err,
+		args, err := n.paramList.BuildList(c)
+		if err != nil {
+			return errArgumentsFailed{
+				Func:   n.location,
+				Reason: err,
+			}
 		}
+
+		results = reflect.ValueOf(n.ctor).Call(args)
 	}
 
 	receiver := newStagingContainerWriter()
-	results := reflect.ValueOf(n.ctor).Call(args)
 	if err := n.resultList.ExtractList(receiver, results); err != nil {
 		return errConstructorFailed{Func: n.location, Reason: err}
 	}

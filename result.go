@@ -67,7 +67,7 @@ type resultOptions struct {
 func newResult(t reflect.Type, opts resultOptions) (result, error) {
 	switch {
 	case IsIn(t) || (t.Kind() == reflect.Ptr && IsIn(t.Elem())) || embedsType(t, _inPtrType):
-		return nil, errf("cannot provide parameter objects", "%v embeds a inject.In", t)
+		return nil, errf("cannot provideWithConstructor parameter objects", "%v embeds a inject.In", t)
 	case isError(t):
 		return nil, errf("cannot return an error here, return it from the constructor instead")
 	case IsOut(t):
@@ -154,7 +154,7 @@ func walkResult(r result, v resultVisitor) {
 		panic(fmt.Sprintf(
 			"It looks like you have found a bug in inject. "+
 				"Please file an issue at https://github.com/uber-go/dig/issues/ "+
-				"and provide the following message: "+
+				"and provideWithConstructor the following message: "+
 				"received unknown result type %T", res))
 	}
 }
@@ -207,10 +207,27 @@ func newResultList(ctype reflect.Type, opts resultOptions) (resultList, error) {
 	return rl, nil
 }
 
+func newResultListWithValue(vtype reflect.Type, opts resultOptions) (resultList, error) {
+	rl := resultList{
+		ctype:         nil,
+		Results:       make([]result, 0, 1),
+		resultIndexes: make([]int, 1),
+	}
+
+	result, err := newResult(vtype, opts)
+	if err != nil {
+		return rl, errf("bad result", err)
+	}
+
+	rl.Results = append(rl.Results, result)
+	rl.resultIndexes[0] = 0
+	return rl, nil
+}
+
 func (resultList) Extract(containerWriter, reflect.Value) {
 	panic("It looks like you have found a bug in inject. " +
 		"Please file an issue at https://github.com/uber-go/dig/issues/ " +
-		"and provide the following message: " +
+		"and provideWithConstructor the following message: " +
 		"resultList.Extract() must never be called")
 }
 

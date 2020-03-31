@@ -123,7 +123,7 @@ func errf(msg string, args ...interface{}) error {
 		if arg == nil {
 			panic("It looks like you have found a bug in inject. " +
 				"Please file an issue at https://github.com/uber-go/dig/issues/ " +
-				"and provide the following message: " +
+				"and provideWithConstructor the following message: " +
 				"arg must not be nil")
 		}
 
@@ -134,7 +134,7 @@ func errf(msg string, args ...interface{}) error {
 				panic(fmt.Sprintf(
 					"It looks like you have found a bug in inject. "+
 						"Please file an issue at https://github.com/uber-go/dig/issues/ "+
-						"and provide the following message: "+
+						"and provideWithConstructor the following message: "+
 						"string %q needs %v arguments, got %v", v, need, len(args)))
 			}
 
@@ -156,7 +156,7 @@ func errf(msg string, args ...interface{}) error {
 				panic(fmt.Sprintf(
 					"It looks like you have found a bug in inject. "+
 						"Please file an issue at https://github.com/uber-go/dig/issues/ "+
-						"and provide the following message: "+
+						"and provideWithConstructor the following message: "+
 						"error must be the last element but got %v", args))
 			}
 
@@ -166,7 +166,7 @@ func errf(msg string, args ...interface{}) error {
 			panic(fmt.Sprintf(
 				"It looks like you have found a bug in inject. "+
 					"Please file an issue at https://github.com/uber-go/dig/issues/ "+
-					"and provide the following message: "+
+					"and provideWithConstructor the following message: "+
 					"unexpected errf-argument type %T", arg))
 		}
 	}
@@ -236,7 +236,7 @@ func (e errProvide) cause() error {
 }
 
 func (e errProvide) writeMessage(w io.Writer, verb string) {
-	fmt.Fprintf(w, "cannot provide function "+verb, e.Func)
+	fmt.Fprintf(w, "cannot provideWithConstructor function "+verb, e.Func)
 }
 
 func (e errProvide) Error() string { return fmt.Sprint(e) }
