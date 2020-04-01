@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Uber Technologies, Inc.
+// Copyright (c) 2020 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,5 +20,36 @@
 
 package inject
 
-// Version of the library.
-const Version = "1.10.0"
+import (
+	"fmt"
+	"strings"
+)
+
+const (
+	_groupTag = "group"
+)
+
+type group struct {
+	Name    string
+	Flatten bool
+}
+
+type errInvalidGroupOption struct{ Option string }
+
+func (e errInvalidGroupOption) Error() string {
+	return fmt.Sprintf("invalid option %q", e.Option)
+}
+
+func parseGroupString(s string) (group, error) {
+	components := strings.Split(s, ",")
+	g := group{Name: components[0]}
+	for _, c := range components[1:] {
+		switch c {
+		case "flatten":
+			g.Flatten = true
+		default:
+			return g, errInvalidGroupOption{Option: c}
+		}
+	}
+	return g, nil
+}

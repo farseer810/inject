@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Uber Technologies, Inc.
+// Copyright (c) 2020 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,5 +20,44 @@
 
 package inject
 
-// Version of the library.
-const Version = "1.10.0"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestParseGroup(t *testing.T) {
+	tests := []struct {
+		name    string
+		group   string
+		wantG   group
+		wantErr string
+	}{
+		{
+			name:  "simple group",
+			group: `somegroup`,
+			wantG: group{Name: "somegroup"},
+		},
+		{
+			name:  "flattened group",
+			group: `somegroup,flatten`,
+			wantG: group{Name: "somegroup", Flatten: true},
+		},
+		{
+			name:    "error",
+			group:   `somegroup,abc`,
+			wantErr: `invalid option "abc"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotG, err := parseGroupString(tt.group)
+			if tt.wantErr != "" {
+				assert.Error(t, err)
+				assert.Contains(t, err.Error(), tt.wantErr)
+				return
+			}
+			assert.Equal(t, tt.wantG, gotG)
+		})
+	}
+}
